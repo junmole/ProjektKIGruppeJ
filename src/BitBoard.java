@@ -16,7 +16,6 @@ public class BitBoard {
                 isMax = false;
             }
             BitValueMoves vm = alphaBeta( isMax, 4);
-
             String move = vm.move;
             System.out.println("Move " + vm.move);
             System.out.println("Move made: " + moveToString(vm.move) + " on expected eval " + vm.v);
@@ -30,15 +29,50 @@ public class BitBoard {
 
     }
 
-
+//ab 8 Figuren auf 10
     static public BitValueMoves alphaBeta(boolean isMax, int depth){
-        return alphaBetaRecursion(depth, -100000.0f, +100000.0f, isMax);
+        BitMoves.moveCounter += 1;
+        int timeDepth = 4;
+        long startTime = System.currentTimeMillis();
+        if (BitMoves.aiRunningTime > 117000){
+            BitValueMoves move = alphaBetaRecursion(2, -100000.0f, +100000.0f, isMax); //panic mode
+            long endTime = System.currentTimeMillis();
+            BitMoves.aiRunningTime += (endTime - startTime);
+            return move;
+        } else if (BitMoves.aiRunningTime > 110000){
+            BitValueMoves move = alphaBetaRecursion(4, -100000.0f, +100000.0f, isMax); //slight panic mode
+            long endTime = System.currentTimeMillis();
+            BitMoves.aiRunningTime += (endTime - startTime);
+            return move;
+        } else if ((BitBoardFigures.blueToMove && BitMoves.blueFigureCount < 8) ||
+                (!BitBoardFigures.blueToMove && BitMoves.redFigureCount < 8)){
+            if (BitMoves.aiRunningTime > 100000){
+                timeDepth = 9; //~3.5s or better in endgame
+            } else {
+                timeDepth = 10; //~13s or better in endgame
+            }
+        } else {
+            timeDepth = 8; //~3.3s on full board
+            if(BitMoves.moveCounter < 5){
+                timeDepth = 6; //fast opening
+            }
+        }
+
+        BitValueMoves move = alphaBetaRecursion(timeDepth, -100000.0f, +100000.0f, isMax);
+        long endTime = System.currentTimeMillis();
+        BitMoves.aiRunningTime += (endTime - startTime);
+        return move;
     }
 
     static public BitValueMoves alphaBetaRecursion(int depth, float alpha, float beta, boolean isMax){
         if(depth == 0 || BitMoves.isGameFinished()){
 //            System.out.println("copy: " + BitMoves.evaluatePosition(depth, SingleRed, SingleBlue, DoubleRed, DoubleBlue, MixedRed, MixedBlue));
             return new BitValueMoves(BitMoves.evaluatePosition(depth, BitBoardFigures.SingleRed, BitBoardFigures.SingleBlue, BitBoardFigures.DoubleRed, BitBoardFigures.DoubleBlue, BitBoardFigures.MixedRed, BitBoardFigures.MixedBlue), null, depth);
+        }
+
+        long hashedBoard = BitMoves.hashBoard();
+        if(BitMoves.elementOfTranspositionTable(hashedBoard) != null){
+            return BitMoves.elementOfTranspositionTable(hashedBoard).bitValueMove;
         }
 
         if (isMax){
@@ -85,7 +119,12 @@ public class BitBoard {
                     break;
                 }
             }
-            return new BitValueMoves(value, bestMove, bestDepth);
+
+            BitValueMoves bitValueMoves = new BitValueMoves(value, bestMove, bestDepth);
+
+            BitMoves.addToTranspositionTable(hashedBoard, new TranspositionValues(bitValueMoves, alpha, beta));
+            return bitValueMoves;
+            //return new BitValueMoves(value, bestMove, bestDepth);
         } else {
             //float value = beta;
             float value = 100000.0f;
@@ -132,7 +171,12 @@ public class BitBoard {
                 }
 
             }
-            return new BitValueMoves(value, bestMove, bestDepth);
+
+            BitValueMoves bitValueMoves = new BitValueMoves(value, bestMove, bestDepth);
+
+            BitMoves.addToTranspositionTable(hashedBoard, new TranspositionValues(bitValueMoves, alpha, beta));
+            return bitValueMoves;
+            //return new BitValueMoves(value, bestMove, bestDepth);
         }
     }
 
@@ -181,6 +225,9 @@ public class BitBoard {
         BitBoardFigures.MixedRed = 0;
         BitBoardFigures.MixedBlue = 0;
 
+        BitMoves.redFigureCount = 0;
+        BitMoves.blueFigureCount = 0;
+
         int charIndex = 0;
         int boardIndex = 0;
         while (fenString.charAt(charIndex) != ' ')
@@ -197,6 +244,7 @@ public class BitBoard {
 
             //System.out.println("Character at: " + fenString.charAt(charIndex) +  " " + charIndex);
             if (fenString.charAt(charIndex) == 'r') {
+                BitMoves.redFigureCount += 1;
                 charIndex++;
                 switch (fenString.charAt(charIndex)){
                     case '0': BitBoardFigures.SingleRed |= (1L << boardIndex++);
@@ -211,6 +259,7 @@ public class BitBoard {
                 }
             }
             if (fenString.charAt(charIndex) == 'b') {
+                BitMoves.blueFigureCount += 1;
                 charIndex++;
                 switch (fenString.charAt(charIndex)){
                     case '0': BitBoardFigures.SingleBlue |= (1L << boardIndex++);

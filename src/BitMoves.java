@@ -1,6 +1,5 @@
-import java.util.Arrays;
-import java.util.Map;
-import java.util.Stack;
+import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 
 import static java.lang.Long.bitCount;
 
@@ -31,11 +30,17 @@ public class BitMoves {
     //String format: 0-3 move, 4 source figure, 5 target figure
     static Stack<String> unmakeStack = new Stack<>();
     public static int counter;
+    public static int moveCounter;
+    public static long aiRunningTime = 0L;
+    public static int redFigureCount;
+    public static int blueFigureCount;
+    public static long[][] zobristTable = new long[64][6];
+    public static Map<Long, TranspositionValues> transpositionTable = new HashMap<>();
     private static final Map<Character, Integer> test1 = Map.of('0',0,'1',1,'2',2,'3',3,'4',4,'5',5,'6',6,'7',7,'8',8,'9',9);
 
 
     public static void main(String[] args) {
-        BitBoard.importFEN("bb5/8/rr7/8/8/8/8/6 b");
+        /*BitBoard.importFEN("bb5/8/rr7/8/8/8/8/6 b");
         String a = BitMoves.possibleMovesBlue(BitBoardFigures.SingleRed, BitBoardFigures.SingleBlue, BitBoardFigures.DoubleRed, BitBoardFigures.DoubleBlue, BitBoardFigures.MixedRed, BitBoardFigures.MixedBlue);
         String b = BitMoves.possibleMovesRed(BitBoardFigures.SingleRed, BitBoardFigures.SingleBlue, BitBoardFigures.DoubleRed, BitBoardFigures.DoubleBlue, BitBoardFigures.MixedRed, BitBoardFigures.MixedBlue);
         //System.out.println("Single Blue: " + BitBoardFigures.SingleBlue);
@@ -52,7 +57,21 @@ public class BitMoves {
         undoMove();
         BitBoard.drawArray(BitBoardFigures.SingleRed, BitBoardFigures.SingleBlue, BitBoardFigures.DoubleRed, BitBoardFigures.DoubleBlue, BitBoardFigures.MixedRed, BitBoardFigures.MixedBlue);
         //System.out.println("Single Blue: " +BitBoardFigures.SingleBlue);
-        //System.out.println("Single Red: " +BitBoardFigures.SingleRed);
+        //System.out.println("Single Red: " +BitBoardFigures.SingleRed);*/
+        long startTime = System.nanoTime();
+        initZobristTable();
+        long endTime = System.nanoTime();
+        System.out.println(endTime - startTime);
+
+        //BitBoard.importFEN("6/4r03/8/8/8/8/8/5r0 b");
+        BitBoard.importFEN("2b0b02/1b0b0b0b0b02/8/8/8/8/3r0r0r0r01/1r0r0r02 b");
+
+        startTime = System.nanoTime();
+        long hashedBoard = hashBoard();
+        endTime = System.nanoTime();
+        System.out.println(endTime - startTime);
+        //addToTranspositionTable(hashedBoard, new TranspositionValues(new BitValueMoves(100, "0123", 3), 0.5f, 0.7f));
+
     }
 
     public static float evaluatePosition(int depth, long SingleRed, long SingleBlue, long DoubleRed, long DoubleBlue, long MixedRed, long MixedBlue){
@@ -871,6 +890,81 @@ public class BitMoves {
 
         return false;
 
+    }
+
+    public static void addToTranspositionTable(long hashedBoard, TranspositionValues transpositionValues){
+        //long hashedBoard = hashBoard();
+        transpositionTable.put(hashedBoard, transpositionValues);
+    }
+
+    //returns TranspositionValues if hashed Board is in transpositionTable, else null
+    public static TranspositionValues elementOfTranspositionTable(long hashedBoard){
+        //long hashedBoard = hashBoard();
+        return transpositionTable.get(hashedBoard);
+    }
+
+    public static void initZobristTable(){
+        Set<Long> uniqueSet = new HashSet<>();
+
+        for (int i = 0; i < 64; i++){
+            for (int j = 0; j < 6; j++){
+                long randomBitSequence = ThreadLocalRandom.current().nextLong(Long.MAX_VALUE);
+                while (uniqueSet.contains(randomBitSequence) || randomBitSequence == 0L){
+                    randomBitSequence = ThreadLocalRandom.current().nextLong(Long.MAX_VALUE);
+                }
+                uniqueSet.add(randomBitSequence);
+                zobristTable[i][j] = randomBitSequence;
+            }
+        }
+    }
+
+    public static long hashBoard(){
+        long hashedBoard = 0L;
+        //i only up to 62 because 63 is the corner that isn't used in part of the board in jumpsturdy
+        //powerN instead of Math.pow because Math.pow(2, 63) overflows
+        for (int i = 1; i < 63; i++){
+            //check if board is empty at index i
+            long iAsBitBoardPosition = powerN(2, i);
+            if((iAsBitBoardPosition & BitBoardFigures.SingleRed) != 0){
+                hashedBoard = hashedBoard | zobristTable[i][0];
+                continue;
+            }
+            if((iAsBitBoardPosition & BitBoardFigures.DoubleRed) != 0){
+                hashedBoard = hashedBoard | zobristTable[i][1];
+                continue;
+            }
+            if((iAsBitBoardPosition & BitBoardFigures.MixedRed) != 0){
+                hashedBoard = hashedBoard | zobristTable[i][2];
+                continue;
+            }
+            if((iAsBitBoardPosition & BitBoardFigures.SingleBlue) != 0){
+                hashedBoard = hashedBoard | zobristTable[i][3];
+                continue;
+            }
+            if((iAsBitBoardPosition & BitBoardFigures.DoubleBlue) != 0){
+                hashedBoard = hashedBoard | zobristTable[i][4];
+                continue;
+            }
+            if((iAsBitBoardPosition & BitBoardFigures.MixedBlue) != 0){
+                hashedBoard = hashedBoard | zobristTable[i][5];
+                continue;
+            }
+        }
+        return hashedBoard;
+    }
+
+    //https://stackoverflow.com/questions/29996070/using-int-double-and-long-in-calculation-of-powers
+    public static long powerN(long number, int power){
+        long res = 1;
+        long sq = number;
+        while(power > 0){
+            if(power % 2 == 1){
+                res *= sq;
+            }
+            sq = sq * sq;
+            power /= 2;
+        }
+        return res;
     }
 
     public static String possibleMovesToString(String moves){

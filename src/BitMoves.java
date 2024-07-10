@@ -61,15 +61,21 @@ public class BitMoves {
         long startTime = System.nanoTime();
         initZobristTable();
         long endTime = System.nanoTime();
+        //System.out.println(Arrays.deepToString(zobristTable));
         System.out.println(endTime - startTime);
 
         //BitBoard.importFEN("6/4r03/8/8/8/8/8/5r0 b");
         BitBoard.importFEN("2b0b02/1b0b0b0b0b02/8/8/8/8/3r0r0r0r01/1r0r0r02 b");
 
-        startTime = System.nanoTime();
-        long hashedBoard = hashBoard();
-        endTime = System.nanoTime();
-        System.out.println(endTime - startTime);
+
+        long hashedBoard1 = hashBoard();
+        System.out.println(hashedBoard1);
+
+        BitBoard.importFEN("2b0b02/1b0b0b0b03/6b01/8/8/8/3r0r0r0r01/1r0r0r02 b");
+        long hashedBoard2 = hashBoard();
+        System.out.println(hashedBoard2);
+
+        System.out.println(hashedBoard1==hashedBoard2);
         //addToTranspositionTable(hashedBoard, new TranspositionValues(new BitValueMoves(100, "0123", 3), 0.5f, 0.7f));
 
     }
@@ -926,27 +932,27 @@ public class BitMoves {
             //check if board is empty at index i
             long iAsBitBoardPosition = powerN(2, i);
             if((iAsBitBoardPosition & BitBoardFigures.SingleRed) != 0){
-                hashedBoard = hashedBoard | zobristTable[i][0];
+                hashedBoard = hashedBoard ^ zobristTable[i][0];
                 continue;
             }
             if((iAsBitBoardPosition & BitBoardFigures.DoubleRed) != 0){
-                hashedBoard = hashedBoard | zobristTable[i][1];
+                hashedBoard = hashedBoard ^ zobristTable[i][1];
                 continue;
             }
             if((iAsBitBoardPosition & BitBoardFigures.MixedRed) != 0){
-                hashedBoard = hashedBoard | zobristTable[i][2];
+                hashedBoard = hashedBoard ^ zobristTable[i][2];
                 continue;
             }
             if((iAsBitBoardPosition & BitBoardFigures.SingleBlue) != 0){
-                hashedBoard = hashedBoard | zobristTable[i][3];
+                hashedBoard = hashedBoard ^ zobristTable[i][3];
                 continue;
             }
             if((iAsBitBoardPosition & BitBoardFigures.DoubleBlue) != 0){
-                hashedBoard = hashedBoard | zobristTable[i][4];
+                hashedBoard = hashedBoard ^ zobristTable[i][4];
                 continue;
             }
             if((iAsBitBoardPosition & BitBoardFigures.MixedBlue) != 0){
-                hashedBoard = hashedBoard | zobristTable[i][5];
+                hashedBoard = hashedBoard ^ zobristTable[i][5];
                 continue;
             }
         }

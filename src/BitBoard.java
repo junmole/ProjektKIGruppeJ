@@ -1,4 +1,3 @@
-import java.awt.geom.QuadCurve2D;
 import java.util.Arrays;
 
 import static java.lang.Character.isDigit;
@@ -29,7 +28,7 @@ public class BitBoard {
 
     }
 
-//ab 8 Figuren auf 10
+
     static public BitValueMoves alphaBeta(boolean isMax, int depth){
         BitMoves.moveCounter += 1;
         int timeDepth = 4;
@@ -55,6 +54,7 @@ public class BitBoard {
             timeDepth = 8; //~3.3s on full board
             if(BitMoves.moveCounter < 5){
                 timeDepth = 6; //fast opening
+                //timeDepth = 6; //TODO: DEBUG HERE AND COMMENT OUT
             }
         }
 
@@ -64,15 +64,47 @@ public class BitBoard {
         return move;
     }
 
+    static public BitValueMoves alphaBetaWithTransposition(boolean isMax, int depth){
+        BitMoves.moveCounter += 1;
+        int timeDepth = 4;
+        long startTime = System.currentTimeMillis();
+        if (BitMoves.aiRunningTime > 117000){
+            BitValueMoves move = alphaBetaRecursion(2, -100000.0f, +100000.0f, isMax); //panic mode
+            long endTime = System.currentTimeMillis();
+            BitMoves.aiRunningTime += (endTime - startTime);
+            return move;
+        }
+        if (BitMoves.aiRunningTime > 110000){
+            BitValueMoves move = alphaBetaRecursion(4, -100000.0f, +100000.0f, isMax); //slight panic mode
+            long endTime = System.currentTimeMillis();
+            BitMoves.aiRunningTime += (endTime - startTime);
+            return move;
+        }
+        if ((BitBoardFigures.blueToMove && BitMoves.blueFigureCount < 8) ||
+                (!BitBoardFigures.blueToMove && BitMoves.redFigureCount < 8)){
+            if (BitMoves.aiRunningTime > 100000){
+                timeDepth = 9; //~3.5s or better in endgame
+            } else {
+                timeDepth = 10; //~13s or better in endgame
+            }
+        } else {
+            timeDepth = 8; //~3.3s on full board
+            if(BitMoves.moveCounter < 5){
+                timeDepth = 6; //fast opening
+                //timeDepth = 6; //TODO: DEBUG HERE AND COMMENT OUT
+            }
+        }
+
+        BitValueMoves move = alphaBetaWithTranspositionTableRecursion(timeDepth, -100000.0f, +100000.0f, isMax);
+        long endTime = System.currentTimeMillis();
+        BitMoves.aiRunningTime += (endTime - startTime);
+        return move;
+    }
+
     static public BitValueMoves alphaBetaRecursion(int depth, float alpha, float beta, boolean isMax){
         if(depth == 0 || BitMoves.isGameFinished()){
 //            System.out.println("copy: " + BitMoves.evaluatePosition(depth, SingleRed, SingleBlue, DoubleRed, DoubleBlue, MixedRed, MixedBlue));
             return new BitValueMoves(BitMoves.evaluatePosition(depth, BitBoardFigures.SingleRed, BitBoardFigures.SingleBlue, BitBoardFigures.DoubleRed, BitBoardFigures.DoubleBlue, BitBoardFigures.MixedRed, BitBoardFigures.MixedBlue), null, depth);
-        }
-
-        long hashedBoard = BitMoves.hashBoard();
-        if(BitMoves.elementOfTranspositionTable(hashedBoard) != null){
-            return BitMoves.elementOfTranspositionTable(hashedBoard).bitValueMove;
         }
 
         if (isMax){
@@ -91,7 +123,6 @@ public class BitBoard {
 //                System.out.println("Move make: " +makeMove);
 //                BitBoard.drawArray(BitBoardFigures.SingleRed, BitBoardFigures.SingleBlue, BitBoardFigures.DoubleRed, BitBoardFigures.DoubleBlue, BitBoardFigures.MixedRed, BitBoardFigures.MixedBlue);
                 BitValueMoves evaluation = alphaBetaRecursion(depth - 1, alpha, beta, false);
-
 //                System.out.println("After move is done:" + moveToString(makeMove));
 //                BitBoard.drawArray(BitBoardFigures.SingleRed, BitBoardFigures.SingleBlue, BitBoardFigures.DoubleRed, BitBoardFigures.DoubleBlue, BitBoardFigures.MixedRed, BitBoardFigures.MixedBlue);
                 BitMoves.unmakeStack.push(makeMove);
@@ -120,11 +151,7 @@ public class BitBoard {
                 }
             }
 
-            BitValueMoves bitValueMoves = new BitValueMoves(value, bestMove, bestDepth);
-
-            BitMoves.addToTranspositionTable(hashedBoard, new TranspositionValues(bitValueMoves, alpha, beta));
-            return bitValueMoves;
-            //return new BitValueMoves(value, bestMove, bestDepth);
+            return new BitValueMoves(value, bestMove, bestDepth);
         } else {
             //float value = beta;
             float value = 100000.0f;
@@ -172,11 +199,96 @@ public class BitBoard {
 
             }
 
-            BitValueMoves bitValueMoves = new BitValueMoves(value, bestMove, bestDepth);
+            return new BitValueMoves(value, bestMove, bestDepth);
+        }
+    }
 
+    static public BitValueMoves alphaBetaWithTranspositionTableRecursion(int depth, float alpha, float beta, boolean isMax){
+        if(depth == 0 || BitMoves.isGameFinished()){
+            return new BitValueMoves(BitMoves.evaluatePosition(depth, BitBoardFigures.SingleRed, BitBoardFigures.SingleBlue, BitBoardFigures.DoubleRed, BitBoardFigures.DoubleBlue, BitBoardFigures.MixedRed, BitBoardFigures.MixedBlue), null, depth);
+        }
+
+        long hashedBoard = BitMoves.hashBoard();
+        if(BitMoves.elementOfTranspositionTable(hashedBoard) != null){
+            return BitMoves.elementOfTranspositionTable(hashedBoard).bitValueMove;
+        }
+
+        if (isMax){
+            float value = -100000.0f;
+            String bestMove = null;
+            int bestDepth = depth;
+            String moves;
+
+
+            moves = BitMoves.possibleMovesBlue(BitBoardFigures.SingleRed, BitBoardFigures.SingleBlue, BitBoardFigures.DoubleRed, BitBoardFigures.DoubleBlue, BitBoardFigures.MixedRed, BitBoardFigures.MixedBlue);
+
+
+            for (int i=0; i<moves.length(); i+=4) {
+                String makeMove = BitMoves.makeMove(moves.substring(i, i + 4), true);
+                //BitValueMoves evaluation = alphaBetaRecursion(depth - 1, alpha, beta, false);
+
+                BitValueMoves evaluation = alphaBetaWithTranspositionTableRecursion(depth - 1, alpha, beta, false);
+
+                BitMoves.unmakeStack.push(makeMove);
+                BitMoves.undoMove();
+
+                if (evaluation.v > value ||
+                        (evaluation.v == value && evaluation.depth > bestDepth)){
+                    value = evaluation.v;
+                    bestMove = moves.substring(i, i + 4);
+                    bestDepth = evaluation.depth;
+                }
+
+                alpha = Math.max(alpha, value);
+
+                if (alpha >= beta) {
+                    break;
+                }
+            }
+
+            BitValueMoves bitValueMoves = new BitValueMoves(value, bestMove, bestDepth);
+            hashedBoard = BitMoves.hashBoard(); //TODO: maybe remove
             BitMoves.addToTranspositionTable(hashedBoard, new TranspositionValues(bitValueMoves, alpha, beta));
             return bitValueMoves;
-            //return new BitValueMoves(value, bestMove, bestDepth);
+
+        } else {
+            float value = 100000.0f;
+            String bestMove = null;
+            int bestDepth = depth;
+            String moves;
+
+
+            moves = BitMoves.possibleMovesRed(BitBoardFigures.SingleRed, BitBoardFigures.SingleBlue, BitBoardFigures.DoubleRed, BitBoardFigures.DoubleBlue, BitBoardFigures.MixedRed, BitBoardFigures.MixedBlue);
+
+
+            for (int i=0; i<moves.length(); i+=4) {
+                String makeMove = BitMoves.makeMove(moves.substring(i, i + 4), true);
+
+                BitValueMoves evaluation = alphaBetaWithTranspositionTableRecursion(depth - 1, alpha, beta, true);
+
+                BitMoves.unmakeStack.push(makeMove);
+                BitMoves.undoMove();
+
+                if (evaluation.v < value ||
+                        (evaluation.v == value && evaluation.depth > bestDepth)){
+                    value = evaluation.v;
+                    bestMove = moves.substring(i, i + 4);
+                    bestDepth = evaluation.depth;
+                }
+
+                beta = Math.min(beta, value);
+
+                if (alpha >= beta) {
+                    break;
+                }
+
+            }
+
+            BitValueMoves bitValueMoves = new BitValueMoves(value, bestMove, bestDepth);
+            hashedBoard = BitMoves.hashBoard(); //TODO: maybe remove
+            BitMoves.addToTranspositionTable(hashedBoard, new TranspositionValues(bitValueMoves, alpha, beta));
+            return bitValueMoves;
+
         }
     }
 

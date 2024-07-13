@@ -19,7 +19,7 @@ public class BitValueMoves {
             int end_row = Character.getNumericValue(move.charAt(2)) + 1;
 
             return "" + start_col + start_row + "-" + end_col + end_row;
-        }else return move;
+        }else return null;
     }
 }
 

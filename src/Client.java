@@ -39,11 +39,9 @@ public class Client {
 
                         //TODO: add your AI getMove() call here
                         //answer must have format: start_field-end_field like E7-F7
-                        //String input = scanner.nextLine();
-                        // String input = myAI.getMove();
 
                         BitBoard.importFEN(game.board);
-                        String input = BitBoard.alphaBeta(BitBoardFigures.blueToMove, 4).moveToString();
+                        String input = BitBoard.alphaBeta(BitBoardFigures.blueToMove).moveToString();
                         //BitMoves.makeMove(input, true);
 
                         // transforms the input move to JSON
@@ -56,7 +54,7 @@ public class Client {
                         System.out.println("New Board: " + game.board);
 
                         BitBoard.importFEN(game.board);
-                        String input = BitBoard.alphaBeta(BitBoardFigures.blueToMove, 4).moveToString();
+                        String input = BitBoard.alphaBeta(BitBoardFigures.blueToMove).moveToString();
                         //BitMoves.makeMove(input, true);
 
                         String data = gson.toJson(input);

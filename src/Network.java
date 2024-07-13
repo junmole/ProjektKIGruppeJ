@@ -5,9 +5,9 @@ class Network {
     private Socket client;
     private BufferedReader in;
     private PrintWriter out;
-    private String server = "localhost";
+    private final String server = "localhost";
     //port on which the server.py is running, add to Network constructor if necessary
-    private int port = 5555;
+    private final int port = 5555;
     private String p;
 
     public Network() {

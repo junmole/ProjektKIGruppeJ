@@ -3,35 +3,26 @@ import java.util.concurrent.ThreadLocalRandom;
 
 
 public class BitMoves {
-    static long RED_CAPTURE;
-    static long RED_ROOK;
-    static long RED_NON_CAPTURE;
-    static long BLUE_CAPTURE;
-    static long BLUE_NON_CAPTURE;
-    static long BLUE_ROOK;
-    static long EMPTY_BLUE;
-    static long EMPTY_RED;
-    static long EMPTY_KNIGHT_RED;
-    static long EMPTY_KNIGHT_BLUE;
-    static final long FILE_A = 36170086419038336L;
-    static final long FILE_AB = 217020518514230019L;
-    static final long FILE_GH = -4557430888798830400L;
-    static final long FILE_H = 72340172838076672L;
-    static final long EDGE_0 = 1L;
-    static final long EDGE_7 = 128L;
-    static final long EDGE_56 =72057594037927936L;
-    static final long EDGE_63 = -9223372036854775808L;
+    static long RED_CAPTURE, RED_ROOK, RED_NON_CAPTURE;
+    static long BLUE_CAPTURE, BLUE_NON_CAPTURE, BLUE_ROOK;
+    static long EMPTY_BLUE, EMPTY_RED, EMPTY_KNIGHT_RED, EMPTY_KNIGHT_BLUE;
+    static final long FILE_A = 36170086419038336L, FILE_AB = 217020518514230019L;
+    static final long FILE_GH = -4557430888798830400L,  FILE_H = 72340172838076672L;
+    static final long EDGE_0 = 1L, EDGE_7 = 128L;
+    static final long EDGE_56 =72057594037927936L, EDGE_63 = -9223372036854775808L;
     static boolean colorRed = true;
     static boolean capture = false;
 
-    static String startFigure = "";
-    static String endFigure = "";
+    static String startFigure = "", endFigure = "";
     //String format: 0-3 move, 4 source figure, 5 target figure
+
     static Stack<String> unmakeStack = new Stack<>();
+    static boolean mctsBlueStarted;
+    static boolean mctsBlueToMove;
     public static int moveCounter;
-    public static long aiRunningTime = 0L;
-    public static int redFigureCount;
-    public static int blueFigureCount;
+
+    public static long aiRunningTime = 0L, aiRunningTime1 = 0L, aiRunningTime2 = 0L;
+    public static int redFigureCount, blueFigureCount;
     public static long[][] zobristTable = new long[64][6];
     public static Map<Long, TranspositionValues> transpositionTable = new HashMap<>();
     static Map<Long, Integer> gameStateHistory = new HashMap<>();
@@ -228,7 +219,7 @@ public class BitMoves {
     private static String possibleMovesNB(long knightBlue) {
         String knightBlueMoves = "";
         //1 left 2 down
-        long KNIGHTRED_MOVES = (knightBlue << 15) & EMPTY_KNIGHT_BLUE & ~FILE_A & ~EDGE_56;
+        long KNIGHTRED_MOVES = (knightBlue << 15) & EMPTY_KNIGHT_BLUE & ~-9187201950435770368L & ~EDGE_56;
         for (int i = Long.numberOfTrailingZeros(KNIGHTRED_MOVES); i < 64 - Long.numberOfLeadingZeros(KNIGHTRED_MOVES); i++) {
             if (((KNIGHTRED_MOVES >> i) & 1) == 1) {
 //                System.out.println("1 left 2 down " + i);
@@ -266,9 +257,6 @@ public class BitMoves {
 
         return knightBlueMoves;
     }
-
-
-    //for improved isGameFinished()
 
     public static boolean hasPossibleMovesBlue(long SingleRed, long SingleBlue, long DoubleRed, long DoubleBlue, long MixedRed, long MixedBlue) {
         BLUE_CAPTURE = SingleRed | DoubleRed | MixedRed;
@@ -472,7 +460,6 @@ public class BitMoves {
 
         return false;
     }
-
 
     public static String makeMove(String moves, boolean start){
         //startfeld

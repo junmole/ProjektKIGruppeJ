@@ -1,6 +1,8 @@
 import java.util.Arrays;
-
-import static java.lang.Long.bitCount;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * The {@code BitBoard} class manages the game state and AI for the board game, Jump Board,
@@ -11,6 +13,16 @@ public class BitBoard {
     static boolean blueWon;
     public static int counter;
     public static boolean draw;
+    public static final Map<Integer, Double> valuesTable;
+    static {
+        valuesTable = new HashMap<>();
+        valuesTable.put(0, 47.5);
+        valuesTable.put(1, 33.75);
+        valuesTable.put(2, 18.5);
+        valuesTable.put(3, 15.0);
+        valuesTable.put(4, 27.5);
+        valuesTable.put(5, 30.0);
+    }
 
     public static void main(String[] args) {
         importFEN("b0b0b0b0b0b0/1b0b0b0b0b0b01/8/8/8/8/1r0r0r0r0r0r01/r0r0r0r0r0r0 b");
@@ -29,7 +41,39 @@ public class BitBoard {
             System.out.println(isGameFinished());
 
         }
+        /*
+        //ALpha Beta spielt gegen Monte Carlo Tree Search
+        for (int i = 0; i < 10; i++) {
+            importFEN("b0b0b0b0b0b0/1b0b0b0b0b0b01/8/8/8/8/1r0r0r0r0r0r01/r0r0r0r0r0r0 r");
+            boolean isMax;
+            BitMoves.initZobristTable();
 
+            while (!BitMoves.isGameFinished()) {
+                isMax = BitBoardFigures.blueToMove;
+
+                String move;
+                if (isMax) {
+                    //alpha beta plays blue
+                    move = alphaBetaWithTransposition(isMax, 4).move;
+                    System.out.println("alphaBeta is making the move: " + move);
+                } else {
+                    //mcts plays red
+                    //timelimit in ms
+                    move = mctsUCT(500);
+                    System.out.println("mcts is making the move: " + move);
+                }
+                BitMoves.makeMove(move, true);
+                //BitBoard.drawArray(BitBoardFigures.SingleRed, BitBoardFigures.SingleBlue, BitBoardFigures.DoubleRed, BitBoardFigures.DoubleBlue, BitBoardFigures.MixedRed, BitBoardFigures.MixedBlue);
+                BitBoardFigures.blueToMove = !BitBoardFigures.blueToMove;
+            }
+            if(!BitBoardFigures.blueToMove) {
+                System.out.println("Alpha Beta AI has won!");
+            } else {
+                System.out.println("MCTS AI has won!");
+            }
+            BitBoard.drawArray(BitBoardFigures.SingleRed, BitBoardFigures.SingleBlue, BitBoardFigures.DoubleRed, BitBoardFigures.DoubleBlue, BitBoardFigures.MixedRed, BitBoardFigures.MixedBlue);
+        }
+         */
 
     }
 
@@ -305,6 +349,192 @@ public class BitBoard {
         }
     }
 
+    //computationalBudget in ms
+    static public String mctsUCT(long computationalBudget){
+        String possibleMoves;
+        BitMoves.mctsBlueToMove = BitBoardFigures.blueToMove;
+
+        BitBoardFigures.mctsSingleRed = BitBoardFigures.SingleRed;
+        BitBoardFigures.mctsDoubleRed = BitBoardFigures.DoubleRed;
+        BitBoardFigures.mctsMixedRed = BitBoardFigures.MixedRed;
+        BitBoardFigures.mctsSingleBlue = BitBoardFigures.SingleBlue;
+        BitBoardFigures.mctsDoubleBlue = BitBoardFigures.DoubleBlue;
+        BitBoardFigures.mctsMixedBlue = BitBoardFigures.MixedBlue;
+
+        if(BitMoves.mctsBlueToMove){
+            possibleMoves = BitMoves.possibleMovesBlue(BitBoardFigures.SingleRed, BitBoardFigures.SingleBlue, BitBoardFigures.DoubleRed, BitBoardFigures.DoubleBlue, BitBoardFigures.MixedRed, BitBoardFigures.MixedBlue);
+        } else {
+            possibleMoves = BitMoves.possibleMovesRed(BitBoardFigures.SingleRed, BitBoardFigures.SingleBlue, BitBoardFigures.DoubleRed, BitBoardFigures.DoubleBlue, BitBoardFigures.MixedRed, BitBoardFigures.MixedBlue);
+        }
+
+        MCTSNode root = new MCTSNode("", possibleMoves, null);
+
+        long endtime = System.currentTimeMillis() + computationalBudget;
+
+        MCTSNode v_i;
+        int playoutReward;
+
+        while(System.currentTimeMillis() < endtime){
+            BitMoves.mctsBlueToMove = BitBoardFigures.blueToMove;
+
+            v_i = mctsTreePolicy(root);
+            playoutReward = mctsDefaultPolicy();
+            mctsBackup(v_i, playoutReward);
+        }
+
+        //get best move
+        /*String bestMove;
+        try {
+            bestMove = root.children.entrySet().stream().reduce((entry1, entry2) -> entry1.getValue().getWinRate() > entry2.getValue().getWinRate() ? entry1 : entry2).get().getKey();
+        } catch (NoSuchElementException e){
+            return "";
+        }
+
+        return bestMove;*/
+
+        return mctsBestChild(root, 0).sourceMove;
+    }
+
+    private static MCTSNode mctsTreePolicy(MCTSNode root){
+        MCTSNode nodePointer = root;
+
+        //while(!nodePointer.isTerminal){
+        while(!BitBoard.isGameFinished()){
+            if(!nodePointer.isExpanded){
+                return mctsExpand(nodePointer);
+            } else {
+                nodePointer = mctsBestChild(nodePointer, Math.sqrt(2));
+                String move = BitMoves.makeMove(nodePointer.sourceMove, true);
+                //BitMoves.unmakeStack.push(move);
+                BitMoves.mctsBlueToMove = !BitMoves.mctsBlueToMove;
+            }
+        }
+
+        return nodePointer;
+    }
+
+    private static MCTSNode mctsExpand(MCTSNode root){
+        String randomUntriedMove = root.getRandomPlayoutMove();
+
+        randomUntriedMove = BitMoves.makeMove(randomUntriedMove, true);
+        //BitMoves.unmakeStack.push(randomUntriedMove);
+        BitMoves.mctsBlueToMove = !BitMoves.mctsBlueToMove;
+
+        String possibleMoves;
+        if(BitMoves.mctsBlueToMove){
+            possibleMoves = BitMoves.possibleMovesBlue(BitBoardFigures.SingleRed, BitBoardFigures.SingleBlue, BitBoardFigures.DoubleRed, BitBoardFigures.DoubleBlue, BitBoardFigures.MixedRed, BitBoardFigures.MixedBlue);
+        } else {
+            possibleMoves = BitMoves.possibleMovesRed(BitBoardFigures.SingleRed, BitBoardFigures.SingleBlue, BitBoardFigures.DoubleRed, BitBoardFigures.DoubleBlue, BitBoardFigures.MixedRed, BitBoardFigures.MixedBlue);
+        }
+
+        MCTSNode newChild = new MCTSNode(randomUntriedMove, possibleMoves, root);
+
+        root.addChild(randomUntriedMove, newChild);
+        return newChild;
+    }
+
+    private static MCTSNode mctsBestChild(MCTSNode node, double uct_c){
+        try {
+            return node.children.entrySet().stream().reduce((entry1, entry2) -> uctValue(entry1.getValue(), uct_c) > uctValue(entry2.getValue(), uct_c) ? entry1 : entry2).get().getValue();
+        } catch (NoSuchElementException e){
+            return null;
+        }
+    }
+
+    private static double uctValue(MCTSNode node, double uct_c){
+        return node.playoutsWon / node.playoutsSum + uct_c * Math.sqrt((Math.log(node.parent.playoutsSum / node.playoutsSum)));
+    }
+
+    private static int mctsDefaultPolicy(){
+        String moves;
+        while(!BitBoard.isGameFinished()){
+            if (BitMoves.mctsBlueToMove){
+                moves = BitMoves.possibleMovesBlue(BitBoardFigures.SingleRed, BitBoardFigures.SingleBlue, BitBoardFigures.DoubleRed, BitBoardFigures.DoubleBlue, BitBoardFigures.MixedRed, BitBoardFigures.MixedBlue);
+            } else {
+                moves = BitMoves.possibleMovesRed(BitBoardFigures.SingleRed, BitBoardFigures.SingleBlue, BitBoardFigures.DoubleRed, BitBoardFigures.DoubleBlue, BitBoardFigures.MixedRed, BitBoardFigures.MixedBlue);
+            }
+
+            //select move uniformly at random
+            //sometimes BitMoves.mctsBlueToMove is wrong, the try-catch fixes this bug
+            int offset;
+            try {
+                offset = ThreadLocalRandom.current().nextInt(0, moves.length()/4);
+            } catch (IllegalArgumentException ignored){
+                BitMoves.mctsBlueToMove = !BitMoves.mctsBlueToMove;
+                if (BitMoves.mctsBlueToMove){
+                    moves = BitMoves.possibleMovesBlue(BitBoardFigures.SingleRed, BitBoardFigures.SingleBlue, BitBoardFigures.DoubleRed, BitBoardFigures.DoubleBlue, BitBoardFigures.MixedRed, BitBoardFigures.MixedBlue);
+                } else {
+                    moves = BitMoves.possibleMovesRed(BitBoardFigures.SingleRed, BitBoardFigures.SingleBlue, BitBoardFigures.DoubleRed, BitBoardFigures.DoubleBlue, BitBoardFigures.MixedRed, BitBoardFigures.MixedBlue);
+                }
+                offset = ThreadLocalRandom.current().nextInt(0, moves.length()/4);
+            }
+
+            String randomMove = moves.substring(offset*4, offset*4+4);
+
+            randomMove = BitMoves.makeMove(randomMove, true);
+            //BitMoves.unmakeStack.push(randomMove);
+            BitMoves.mctsBlueToMove = !BitMoves.mctsBlueToMove;
+        }
+
+        counter += 1;
+        if(counter == Long.MAX_VALUE - 1) System.out.println("overflowing");
+
+        if(BitMoves.mctsBlueStarted){
+            if(BitBoard.blueWon){
+                return 1;
+            } else {
+                //return -1;
+                return 0;
+            }
+        } else {
+            if(BitBoard.blueWon){
+                //return -1;
+                return 0;
+            } else {
+                return 1;
+            }
+        }
+    }
+
+    private static void mctsBackup(MCTSNode leaf, int reward){
+        leaf.playoutsSum = 1;
+        leaf.playoutsWon = reward;
+        MCTSNode parent = leaf.parent;
+        while(parent != null){
+            parent.playoutsSum++;
+            parent.playoutsWon += reward;
+            parent = parent.parent;
+        }
+
+        BitBoardFigures.SingleRed = BitBoardFigures.mctsSingleRed;
+        BitBoardFigures.SingleBlue = BitBoardFigures.mctsSingleBlue;
+        BitBoardFigures.MixedRed = BitBoardFigures.mctsMixedRed;
+        BitBoardFigures.MixedBlue = BitBoardFigures.mctsMixedBlue;
+        BitBoardFigures.DoubleRed = BitBoardFigures.mctsDoubleRed;
+        BitBoardFigures.DoubleBlue = BitBoardFigures.mctsDoubleBlue;
+
+        /*while(!BitMoves.unmakeStack.isEmpty()){
+            try {
+                BitMoves.undoMove();
+            } catch (StringIndexOutOfBoundsException e){
+                //System.out.println(BitMoves.unmakeStack);
+                break;
+            }
+
+            //drawArray(BitBoardFigures.SingleRed,BitBoardFigures.SingleBlue,BitBoardFigures.DoubleRed,BitBoardFigures.DoubleBlue,BitBoardFigures.MixedRed,BitBoardFigures.MixedBlue);
+
+        }*/
+        //importFEN("b0b0b0b0b0b0/1b0b0b0b0b0b01/8/8/8/8/1r0r0r0r0r0r01/r0r0r0r0r0r0 b");
+
+
+
+        /*try {
+            Thread.sleep(50);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }*/
+    }
+
     /**
      * Evaluates the current board position and returns a score indicating
      * the relative advantage for either player.
@@ -319,47 +549,128 @@ public class BitBoard {
      *  advantage for Blue, while negative values indicate an advantage for Red. A value of zero indicates a draw.
      */
     public static float evaluatePosition(int depth, long SingleRed, long SingleBlue, long DoubleRed, long DoubleBlue, long MixedRed, long MixedBlue) {
-        BitBoard.counter++;
-        float value = 0;
-        if (isGameFinished()) {
-            if (BitBoard.blueWon) {
-                return 1000.0f + depth;
-            } else {
-                return -1000.0f - depth;
+        counter++;
+        float value= 0;
+        if(isGameFinished()) {
+            if(draw){
+                return 0.0f;
+            }
+            else if (blueWon) {
+                return +10000.0f + depth;
+            } else{
+                return -10000.0f - depth;
             }
         }
 
-        if (isDraw()){
-            return 0.0f;
-        }
+        //System.out.println(valuesTable.get(1));
+        long redAttacks = calculateAllAttacks(BitBoardFigures.SingleRed, BitBoardFigures.DoubleRed, BitBoardFigures.MixedRed, true);
+        long blueAttacks = calculateAllAttacks(BitBoardFigures.SingleBlue, BitBoardFigures.DoubleBlue, BitBoardFigures.MixedBlue, false);
 
-        value += bitCount(SingleBlue) * 10;
-        for (int i = Long.numberOfTrailingZeros(SingleBlue); i < 64 - Long.numberOfLeadingZeros(SingleBlue); i++) {
-            if (((SingleBlue >> i) & 1) == 1) {
-                value += (float) ((i / 8 + 1) * 2.5);
-            }
-        }
-        value += bitCount(DoubleBlue) * 20;
-        for (int i = Long.numberOfTrailingZeros(DoubleBlue); i < 64 - Long.numberOfLeadingZeros(DoubleBlue); i++) {
-            if (((DoubleBlue >> i) & 1) == 1) {
-                value += (float) (((i / 8 + 1) * 2.5) * 2);
-            }
-        }
-        value -= bitCount(SingleRed) * 10;
-        for (int i = Long.numberOfTrailingZeros(SingleRed); i < 64 - Long.numberOfLeadingZeros(SingleRed); i++) {
-            if (((SingleRed >> i) & 1) == 1) {
-                value -= (float) ((8 - i / 8) * 2.5);
-            }
-        }
-        value -= bitCount(DoubleRed) * 20;
-        for (int i = Long.numberOfTrailingZeros(DoubleRed); i < 64 - Long.numberOfLeadingZeros(DoubleRed); i++) {
-            if (((DoubleRed >> i) & 1) == 1) {
-                value -= (float) (((8 - i / 8) * 2.5) * 2);
-            }
-        }
+        value += evaluatePieces(BitBoardFigures.SingleBlue, 19.5,  blueAttacks, 's');
+        value += evaluatePieces(BitBoardFigures.DoubleBlue, 24.5,  blueAttacks, 'd');
+        value += evaluatePieces(BitBoardFigures.MixedBlue, 24.0,  blueAttacks, 's');
+        value -= evaluatePieces(BitBoardFigures.SingleRed, 19.5,  redAttacks, 'S');
+        value -= evaluatePieces(BitBoardFigures.DoubleRed, 24.5,  redAttacks, 'D');
+        value -= evaluatePieces(BitBoardFigures.MixedRed, 24.0,  redAttacks, 'S');
+
         return value;
     }
 
+    public static float evaluatePieces(long piecePositions, double pieceValue, long allAttacks, char figure){
+        double value = 0;
+        double protectionBonusValue = 2.5;
+        while (piecePositions != 0) {
+            long lsb = piecePositions & -piecePositions;
+            piecePositions ^= lsb;
+
+            int index = Long.numberOfTrailingZeros(lsb);
+            int row = index%8;
+            double protectionBonus = isPieceProtected(lsb, allAttacks) ? protectionBonusValue : 0;
+            value += pieceValue + protectionBonus;
+            switch (figure){
+                case 's':
+                    value += (float) ((index/8+1)*16.5);
+                    break;
+                case 'd':
+                    value += (float) ((index/8+1)*25);
+                    break;
+                case 'S':
+                    value += (float) ((8-index/8)*16.5);
+                    break;
+                case 'D':
+                    value += (float) ((8-index/8)*25);
+                    break;
+            }
+            if((index/8)==0||(index/8)==7){
+                switch (row){
+                    case 1, 6:
+                        value += valuesTable.getOrDefault(0,0.0);
+                        break;
+                    case 2, 5:
+                        value += valuesTable.getOrDefault(1,0.0);
+                        break;
+                    case 3, 4:
+                        value += valuesTable.getOrDefault(2,0.0);
+                        break;
+                }
+            }else{
+                switch (row) {
+                    case 0, 7:
+                        value += valuesTable.getOrDefault(3, 0.0);
+                        break;
+                    case 1, 4, 5:
+                        value += valuesTable.getOrDefault(4, 0.0);
+                        break;
+                    case 2, 3, 6:
+                        value += valuesTable.getOrDefault(5, 0.0);
+                        break;
+                }
+            }
+        }
+
+        return (float) value;
+    }
+
+    public static long calculateAllAttacks(long singlePositions, long doublePositions, long mixedPositions, boolean isRed){
+        long attacks = 0;
+        attacks |= calculateSingleAttacks(singlePositions, isRed);
+        attacks |= calculateDoubleAttacks(doublePositions, isRed);
+        attacks |= calculateDoubleAttacks(mixedPositions, isRed);
+        return attacks;
+    }
+
+    public static long calculateSingleAttacks(long singlePositions, boolean isRed){
+        long attacks = 0;
+        if (isRed) {
+            attacks |= (singlePositions >> 7 & ~BitMoves.FILE_H);
+            attacks |= (singlePositions >> 9 & ~BitMoves.FILE_A);
+        } else {
+            attacks |= (singlePositions << 7 & ~BitMoves.FILE_A);
+            attacks |= (singlePositions << 9 & ~BitMoves.FILE_H);
+
+        }
+        return attacks;
+    }
+
+    public static long calculateDoubleAttacks(long doublePositions, boolean isRed){
+        long attacks = 0;
+        if (isRed) {
+            attacks |= (doublePositions >> 15 & ~BitMoves.FILE_H);
+            attacks |= (doublePositions >> 17 & ~BitMoves.FILE_A);
+            attacks |= (doublePositions >> 10 & ~BitMoves.FILE_GH);
+            attacks |= (doublePositions >> 6 &  ~BitMoves.FILE_AB);
+        } else {
+            attacks |= (doublePositions << 15 & ~BitMoves.FILE_A);
+            attacks |= (doublePositions << 17 & ~BitMoves.FILE_H);
+            attacks |= (doublePositions << 10 & ~BitMoves.FILE_AB);
+            attacks |= (doublePositions << 6 &  ~BitMoves.FILE_GH);
+        }
+        return attacks;
+    }
+
+    public static boolean isPieceProtected(long piecePosition, long allAttacks) {
+        return (piecePosition & allAttacks) != 0;
+    }
 
     /**
      *  Checks if a specific hashed board state has appeared more than three times in the game's history.
@@ -577,7 +888,6 @@ public class BitBoard {
         BitBoardFigures.blueToMove = (fenString.charAt(++charIndex) == 'b');
         drawArray(BitBoardFigures.SingleRed, BitBoardFigures.SingleBlue, BitBoardFigures.DoubleRed, BitBoardFigures.DoubleBlue, BitBoardFigures.MixedRed, BitBoardFigures.MixedBlue);
     }
-
 
     /**
      * Converts a move string into a more readable format.

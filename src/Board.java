@@ -1,8 +1,7 @@
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import static java.lang.Character.isDigit;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 public class Board {
     //board = new Figures[row][column]
@@ -28,14 +27,10 @@ public class Board {
         System.out.println("init eval: " + board.evaluatePosition(0));
         board.boardToString();
 
-        boolean isMax = true;
+        boolean isMax;
         while (!board.isGameFinished(board.blueToMove)) {
 
-            if (board.blueToMove == 1){
-                isMax = true;
-            } else {
-                isMax = false;
-            }
+            isMax = board.blueToMove == 1;
 
             long start = System.currentTimeMillis();
             ValueMove vm = alphaBeta(board, isMax, 4);
@@ -65,11 +60,12 @@ public class Board {
             return new ValueMove(board.evaluatePosition(depth), null, depth);
         }
 
+        float value;
+        Move bestMove = null;
+        int bestDepth = depth;
         if (isMax){
             //float value = alpha;
-            float value = -100000.0f;
-            Move bestMove = null;
-            int bestDepth = depth;
+            value = -100000.0f;
 
             for (Move move : board.getLegalMoves(board.getPossibleMoves(board.blueToMove))) {
                 Board newBoard = new Board();
@@ -93,17 +89,10 @@ public class Board {
                     break;
                 }
 
-                /*if (alpha >= beta) {
-                    //System.out.println("break");
-                    break;
-                }*/
             }
-            return new ValueMove(value, bestMove, bestDepth);
         } else {
             //float value = beta;
-            float value = 100000.0f;
-            Move bestMove = null;
-            int bestDepth = depth;
+            value = 100000.0f;
 
             for (Move move : board.getLegalMoves(board.getPossibleMoves(board.blueToMove))) {
                 Board newBoard = new Board();
@@ -127,14 +116,9 @@ public class Board {
                     break;
                 }
 
-                /*if (alpha >= beta) {
-                    //System.out.println("break");
-                    break;
-                }*/
-
             }
-            return new ValueMove(value, bestMove, bestDepth);
         }
+        return new ValueMove(value, bestMove, bestDepth);
     }
 
     static public ValueMove alphaBetaRecursionNew(Board board, int depth, float alpha, float beta, boolean isMax){
@@ -142,11 +126,12 @@ public class Board {
             return new ValueMove(board.evaluatePosition(depth), null, depth);
         }
 
+        float value;
+        Move bestMove = null;
+        int bestDepth = depth;
         if (isMax){
             //float value = alpha;
-            float value = -100000.0f;
-            Move bestMove = null;
-            int bestDepth = depth;
+            value = -100000.0f;
 
             for (Move move : board.getLegalMoves(board.getPossibleMoves(board.blueToMove))) {
                 Board newBoard = new Board();
@@ -165,22 +150,10 @@ public class Board {
 
                 alpha = Math.max(alpha, value);
 
-                /*if (value > beta) {
-                    //System.out.println("break");
-                    break;
-                }*/
-
-                /*if (beta <= alpha) {
-                    //System.out.println("break");
-                    break;
-                }*/
             }
-            return new ValueMove(value, bestMove, bestDepth);
         } else {
             //float value = beta;
-            float value = 100000.0f;
-            Move bestMove = null;
-            int bestDepth = depth;
+            value = 100000.0f;
 
             for (Move move : board.getLegalMoves(board.getPossibleMoves(board.blueToMove))) {
                 Board newBoard = new Board();
@@ -199,19 +172,9 @@ public class Board {
 
                 beta = Math.min(beta, value);
 
-                /*if (value < alpha) {
-                    //System.out.println("break");
-                    break;
-                }*/
-
-                /*if (beta <= alpha) {
-                    //System.out.println("break");
-                    break;
-                }*/
-
             }
-            return new ValueMove(value, bestMove, bestDepth);
         }
+        return new ValueMove(value, bestMove, bestDepth);
     }
 
     static public ValueMove miniMax(Board board, boolean isMax, int depth) {
@@ -223,10 +186,11 @@ public class Board {
             return new ValueMove(board.evaluatePosition(depth), null, depth);
         }
 
+        float value;
+        Move bestMove = null;
+        int bestDepth = depth;
         if (isMax){
-            float value = -100000.0f;
-            Move bestMove = null;
-            int bestDepth = depth;
+            value = -100000.0f;
 
             for (Move move : board.getLegalMoves(board.getPossibleMoves(board.blueToMove))) {
                 Board newBoard = new Board();
@@ -243,11 +207,8 @@ public class Board {
                     bestDepth = evaluation.depth;
                 }
             }
-            return new ValueMove(value, bestMove, bestDepth);
         } else {
-            float value = 100000.0f;
-            Move bestMove = null;
-            int bestDepth = depth;
+            value = 100000.0f;
 
             for (Move move : board.getLegalMoves(board.getPossibleMoves(board.blueToMove))) {
                 Board newBoard = new Board();
@@ -264,17 +225,15 @@ public class Board {
                     bestDepth = evaluation.depth;
                 }
             }
-            return new ValueMove(value, bestMove, bestDepth);
         }
+        return new ValueMove(value, bestMove, bestDepth);
     }
 
     //TODO: replace with unmake move
     public Figures[][] deepCopyBoard() {
         Figures[][] newBoard = new Figures[8][8];
         for (int i = 0; i < 8; i++) {
-            for (int j = 0; j < 8; j++) {
-                newBoard[i][j] = board[i][j];
-            }
+            System.arraycopy(board[i], 0, newBoard[i], 0, 8);
         }
         return newBoard;
     }
@@ -295,13 +254,13 @@ public class Board {
     //TODO: implement evaluation function, group T FEN 6/4bb3/8/8/4b0r0b01/8/8/6 b; Stellungsbeschreibung: Blau gewinnt in einem Zug durch Blocken not implemented
     public float evaluatePosition(int depth){
         counter++;
-        if(figureMap[0].isEmpty()) return +1000.0f + depth;
+        if(figureMap[0].isEmpty()) return 1000.0f + depth;
         if(figureMap[1].isEmpty()) return -1000.0f - depth;
 
         float value = 0;
 
         for (Map.Entry<Field, Figures> entry : figureMap[1].entrySet()) {
-            if (entry.getKey().row == 7) return +1000.0f + depth;
+            if (entry.getKey().row == 7) return 1000.0f + depth;
 
             if (entry.getValue() == Figures.DOUBLE_BLUE){
                 value += 20;
@@ -328,101 +287,6 @@ public class Board {
 
         return value;
     }
-
-
-    /*
-    //überprüft, ob die korrekten Zeichenkombinationen verwendet worden sind
-    static boolean correctFen(String fen){
-        String regex = "^(?=(?:b0|bb|rb|br|rr|r0|[1-8]|\\/)+\\s+[br]+$)";
-        Matcher matcher = Pattern.compile(regex).matcher(fen);
-        boolean matchFound = matcher.find();
-        if(matchFound&&correctCharCount(fen)&&checkFenLogic(fen)) {
-            System.out.println("Match found");
-            return true;
-        } else {
-            System.out.println("Match not found");
-            return false;
-        }
-    }
-
-    //überprüft, ob die richtige Anzahl von r, b und / vorkommt
-    static boolean correctCharCount(String fen){
-        String regex= "^(?=(?:[^r]*r){0,13}[^r]*$)(?=(?:[^b]*b){0,13}[^b]*$)(?=(?:[^\\/]*\\/){7}[^\\/]*$).*$";
-        Matcher matcher = Pattern.compile(regex).matcher(fen);
-        boolean matchFound = matcher.find();
-        if(matchFound) {
-            return true;
-        } else {
-            System.out.println("Wrong count of / or r or b");
-            return false;
-        }
-    }
-
-    //überprüft die Länge der jeweiligen Zeilen
-    static boolean checkFenLogic(String fen){
-        String[] fen_split = fen.split("/");
-        for(int i = 0; i < fen_split.length; i++) {
-            int count_length = 0;
-            for (int j = 0; j < fen_split[i].length(); j++) {
-                if (isDigit(fen_split[i].charAt(j))) {
-                    count_length += Character.getNumericValue(fen_split[i].charAt(j));
-                }else if(fen_split[i].charAt(j)==' '){
-                    j+=1;
-                }else {
-                    count_length += 1;
-                    j +=1;
-                }
-            }
-            if((i==0 || i==7)){
-                if(count_length !=6){
-                    System.out.println("Wrong length " + i + ". current length" + count_length);
-                    return false;
-                }else if(!correct_lastLine(fen_split[i], i)){
-                    return false;
-                }
-            }else if(i < 7 && count_length != 8) {
-                System.out.println("Wrong length " + i + ". current length" + count_length);
-                return false;
-            }
-        }
-        return true;
-    }
-
-    //überprüft, ob in der ersten/letzten Zeile nur einmal r/b und kein rb/br vorkommt
-    static boolean correct_lastLine(String fen, int line) {
-        switch (line){
-            case 0 ->{
-                String regex= "^(?=[^r]*r?[^r]*$)(?!.*rb).*$";
-                Matcher matcher = Pattern.compile(regex).matcher(fen);
-                boolean matchFound = matcher.find();
-                if(matchFound) {
-                    return true;
-                } else {
-                    System.out.println("non reachable position (First Line)");
-                    return false;
-                }
-            }
-            case 7 ->{
-                String fenLastLine = fen.substring(0,fen.length()-2);
-                String regex= "^(?=[^b]*b?[^b]*$)(?!.*br).*$";
-                Matcher matcher = Pattern.compile(regex).matcher(fenLastLine);
-                boolean matchFound = matcher.find();
-                if(matchFound) {
-                    return true;
-                } else {
-                    System.out.println("non reachable position (Last Line)");
-                    return false;
-                }
-            }
-            default -> {
-                System.out.println("Wrong");
-                return false;
-            }
-        }
-    }
-
-     */
-
 
 
     //assumes the fen has correct syntax; old and slower
@@ -508,94 +372,6 @@ public class Board {
     }
 
     //assumes the fen has correct syntax; TODO
-    /*static void fenToBoardNew(String fen){
-        char[] tmpFEN = fen.toCharArray();
-        char value;
-        int index = 0;
-
-        figureMap[0] = new HashMap<>();
-        figureMap[1] = new HashMap<>();
-
-        for(int i=0; i<8; i++){
-            for(int j=0; j<8; j++){
-
-                //handle blank edges
-                if ((i == 0 && j == 0) || (i == 0 && j == 7) || (i == 7 && j == 0) || (i == 7 && j == 7)){
-                    ++index;
-                    continue;
-                }
-
-                try{
-                    value = tmpFEN[index];
-                    System.out.println(value);
-                } catch (Exception e){
-                    boardToString();
-                    return;
-                }
-
-
-                if(value == 'r'){
-                    ++index;
-                    value = tmpFEN[index];
-
-                    switch (value){
-                        case '0' -> {
-                            board[i][j] = Figures.SINGLE_RED;
-                            figureMap[0].put(new Field(i, j), Figures.SINGLE_RED);
-                        }
-                        case 'r' -> {
-                            board[i][j] = Figures.DOUBLE_RED;
-                            figureMap[0].put(new Field(i, j), Figures.DOUBLE_RED);
-                        }
-                        case 'b' -> {
-                            board[i][j] = Figures.MIXED_BLUE;
-                            figureMap[0].put(new Field(i, j), Figures.MIXED_BLUE);
-                            figureMap[1].put(new Field(i, j), Figures.MIXED_BLUE);
-                        }
-                    }
-                    ++index;
-                    continue;
-                }
-
-                if(value == 'b'){
-                    ++index;
-                    value = tmpFEN[index];
-
-                    switch (value){
-                        case '0' -> {
-                            board[i][j] = Figures.SINGLE_BLUE;
-                            figureMap[1].put(new Field(i, j), Figures.SINGLE_BLUE);
-                        }
-                        case 'b' -> {
-                            board[i][j] = Figures.DOUBLE_BLUE;
-                            figureMap[1].put(new Field(i, j), Figures.DOUBLE_BLUE);
-                        }
-                        case 'r' -> {
-                            board[i][j] = Figures.MIXED_RED;
-                            figureMap[0].put(new Field(i, j), Figures.MIXED_RED);
-                            figureMap[1].put(new Field(i, j), Figures.MIXED_RED);
-                        }
-                    }
-
-                    ++index;
-                    continue;
-                }
-
-                //a character is just an ASCII value in java
-                int skip = value - '0';
-                //before using Profiler:
-                //int skip = Integer.parseInt(String.valueOf(value))
-
-                j += skip - 1;
-                //cut the empty spaces number
-                ++index;
-            }
-
-            //cut the slash from the string
-            //don't cut at the end
-            if(i != 7) ++index;
-        }
-    }*/
 
     public void boardToString(){
         for(int i=7; i>-1; i--){
@@ -689,21 +465,6 @@ public class Board {
                 //find all theoretically possible moves and subtract not allowed moves
                 //time complexity not great
                 case SINGLE_RED -> {
-                    /*if (entry.getKey().col == 0){
-                        moves.add(new Move(entry.getKey().row, entry.getKey().col, entry.getKey().row, entry.getKey().col+1));
-                        moves.add(new Move(entry.getKey().row, entry.getKey().col, (char) (entry.getKey().row-1), entry.getKey().col));
-                        moves.add(new Move(entry.getKey().row, entry.getKey().col, (char) (entry.getKey().row-1), entry.getKey().col+1));
-                    } else if (entry.getKey().col == 7) {
-                        moves.add(new Move(entry.getKey().row, entry.getKey().col, entry.getKey().row, entry.getKey().col-1));
-                        moves.add(new Move(entry.getKey().row, entry.getKey().col, (char) (entry.getKey().row-1), entry.getKey().col));
-                        moves.add(new Move(entry.getKey().row, entry.getKey().col, (char) (entry.getKey().row-1), entry.getKey().col-1));
-                    }  else {
-                        moves.add(new Move(entry.getKey().row, entry.getKey().col, entry.getKey().row, entry.getKey().col+1));
-                        moves.add(new Move(entry.getKey().row, entry.getKey().col, (char) (entry.getKey().row-1), entry.getKey().col));
-                        moves.add(new Move(entry.getKey().row, entry.getKey().col, (char) (entry.getKey().row-1), entry.getKey().col+1));
-                        moves.add(new Move(entry.getKey().row, entry.getKey().col, entry.getKey().row, entry.getKey().col-1));
-                        moves.add(new Move(entry.getKey().row, entry.getKey().col, (char) (entry.getKey().row-1), entry.getKey().col-1));
-                    }*/
                     moves.add(new Move(entry.getKey().row, entry.getKey().col, entry.getKey().row, (char) (entry.getKey().col+1)));
                     moves.add(new Move(entry.getKey().row, entry.getKey().col, entry.getKey().row-1, entry.getKey().col));
                     moves.add(new Move(entry.getKey().row, entry.getKey().col, (entry.getKey().row-1), (char) (entry.getKey().col+1)));
@@ -711,21 +472,6 @@ public class Board {
                     moves.add(new Move(entry.getKey().row, entry.getKey().col, (entry.getKey().row-1), (char) (entry.getKey().col-1)));
                 }
                 case SINGLE_BLUE -> {
-                    /*if (entry.getKey().col == 0){
-                        moves.add(new Move(entry.getKey().row, entry.getKey().col, entry.getKey().row, entry.getKey().col+1));
-                        moves.add(new Move(entry.getKey().row, entry.getKey().col, (char) (entry.getKey().row+1), entry.getKey().col));
-                        moves.add(new Move(entry.getKey().row, entry.getKey().col, (char) (entry.getKey().row+1), entry.getKey().col+1));
-                    } else if (entry.getKey().col == 7) {
-                        moves.add(new Move(entry.getKey().row, entry.getKey().col, entry.getKey().row, entry.getKey().col-1));
-                        moves.add(new Move(entry.getKey().row, entry.getKey().col, (char) (entry.getKey().row+1), entry.getKey().col));
-                        moves.add(new Move(entry.getKey().row, entry.getKey().col, (char) (entry.getKey().row+1), entry.getKey().col-1));
-                    }  else {
-                        moves.add(new Move(entry.getKey().row, entry.getKey().col, entry.getKey().row, entry.getKey().col+1));
-                        moves.add(new Move(entry.getKey().row, entry.getKey().col, (char) (entry.getKey().row+1), entry.getKey().col));
-                        moves.add(new Move(entry.getKey().row, entry.getKey().col, (char) (entry.getKey().row+1), entry.getKey().col+1));
-                        moves.add(new Move(entry.getKey().row, entry.getKey().col, entry.getKey().row, entry.getKey().col-1));
-                        moves.add(new Move(entry.getKey().row, entry.getKey().col, (char) (entry.getKey().row+1), entry.getKey().col-1));
-                    }*/
                     moves.add(new Move(entry.getKey().row, entry.getKey().col, entry.getKey().row, (char) (entry.getKey().col+1)));
                     moves.add(new Move(entry.getKey().row, entry.getKey().col, entry.getKey().row+1, entry.getKey().col));
                     moves.add(new Move(entry.getKey().row, entry.getKey().col, entry.getKey().row+1, (char) (entry.getKey().col+1)));
@@ -876,19 +622,11 @@ public class Board {
             return true;
         }
 
-        if(move.start_col - move.end_col != 0 && move.start_row - move.end_row == 0){
-            return true;
-        }
-
-        return false;
+        return move.start_col - move.end_col != 0 && move.start_row - move.end_row == 0;
     }
 
     public boolean isNormalCapture(Move move){
-        if(move.start_col - move.end_col != 0 && move.start_row - move.end_row != 0){
-            return true;
-        }
-
-        return false;
+        return move.start_col - move.end_col != 0 && move.start_row - move.end_row != 0;
     }
 
     public void makeMove(Move move){

@@ -37,5 +37,6 @@
     <orderEntry type="library" exported="" scope="TEST" name="junit" level="project" />
     <orderEntry type="library" exported="" name="junit.jupiter.api" level="project" />
     <orderEntry type="library" exported="" name="junit.jupiter.params" level="project" />
+    <orderEntry type="library" name="google.code.gson" level="project" />
   </component>
 </module>

@@ -2,7 +2,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class unitTest {
+public class UnitTest {
 
 
     @Test
@@ -146,19 +146,6 @@ public class unitTest {
         board.blueToMove = 1;
         assertEquals(new Move(3,'d',5,'c' ), Board.miniMax(board, true, 4).move);
     }
-/*
-    @Test
-    public void miniMaxGruppeS2(){
-        Board board = new Board();
-        String init =  "2b03/1b0b05/6b01/3b02r01/1b01r02r01/2b05/2r03r01/3r02 b";
-        String fen = init.substring(0, init.length() - 2);
-
-        board.fenToBoard(fen);
-        board.blueToMove = 1;
-        assertEquals(new Move(4,'b',4,'c' ), Board.miniMax(board, true, 4).move);
-    }
-
- */
 
     @Test
     public void miniMaxGruppeJ1(){
@@ -323,19 +310,6 @@ public class unitTest {
         board.blueToMove = 1;
         assertEquals(new Move(3,'d',5,'c' ), Board.alphaBeta(board, true, 4).move);
     }
-/*
-    @Test
-    public void MiniMaxGruppeS2(){
-        Board board = new Board();
-        String init =  "2b03/1b0b05/6b01/3b02r01/1b01r02r01/2b05/2r03r01/3r02 b";
-        String fen = init.substring(0, init.length() - 2);
-
-        board.fenToBoard(fen);
-        board.blueToMove = 1;
-        assertEquals(new Move(4,'b',4,'c' ), Board.miniMax(board, true, 4).move);
-    }
-
- */
 
     @Test
     public void alphaBetaGruppeJ1(){

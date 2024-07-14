@@ -41,13 +41,6 @@ public class BenchmarkTests {
         alphaBetaTest("End Game", endGame, 3);
         alphaBetaTest("End Game", endGame, 4);
 
-        /*
-        benchmarkTests("Test", testGame);
-        benchmarkTests("Start Game", startGame);
-        benchmarkTests("Mid Game", midGame);
-        benchmarkTests("End Game", endGame);
-         */
-
     }
 
     private static void evaluationTestsDepth1(String gamePosition, Board board){
@@ -97,29 +90,6 @@ public class BenchmarkTests {
     }
 
 
-
-    /*
-    private static void benchmarkTests(String gamePosition, String FEN) {
-        String fen = FEN.substring(0, FEN.length() - 2);
-        Board.fenToBoard(fen);
-
-        //Board.blueToMove = (FEN.charAt(FEN.length()-1) == 'b' ? 1 : 0);
-        Board.boardToString();
-
-        long startTime = System.nanoTime();
-        for (int i = 0; i < 1000; i++) {
-
-            //Board.getPossibleMoves(Board.blueToMove);
-        }
-
-
-        long stopTime = System.nanoTime();
-
-        long averageTime = (stopTime - startTime) / (1000);
-        System.out.println("Average time for generating moves for " + gamePosition + ": " + averageTime + " nanoseconds");
-    }
-
-     */
 }
 
 

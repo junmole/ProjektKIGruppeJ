@@ -7,12 +7,15 @@ import java.util.concurrent.ThreadLocalRandom;
 /**
  * The {@code BitBoard} class manages the game state and AI for the board game, Jump Board,
  * implemented using bitboards. It includes methods for evaluating the board,
- * handling game states, and executing the alpha-beta pruning algorithm.
+ * handling game states, and executing the alpha-beta pruning algorithm with and without a
+ * transposition table as well as MCTS algorithm.
  */
 public class BitBoard {
+
     static boolean blueWon;
     public static int counter;
     public static boolean draw;
+
     public static final Map<Integer, Double> valuesTable;
     static {
         valuesTable = new HashMap<>();
@@ -24,9 +27,14 @@ public class BitBoard {
         valuesTable.put(5, 30.0);
     }
 
+    /**
+     * The main method to test the functionality of the BitBoard class.
+     *
+     * @param args the command line arguments
+     */
     public static void main(String[] args) {
         importFEN("b0b0b0b0b0b0/1b0b0b0b0b0b01/8/8/8/8/1r0r0r0r0r0r01/r0r0r0r0r0r0 b");
-        System.out.println("Initial evaluation: " + BitBoard.evaluatePosition(0, BitBoardFigures.SingleRed, BitBoardFigures.SingleBlue, BitBoardFigures.DoubleRed, BitBoardFigures.DoubleBlue, BitBoardFigures.MixedRed, BitBoardFigures.MixedBlue));
+        System.out.println("Initial evaluation: " + BitBoard.evaluatePosition(0));
         boolean isMax;
         while (!isGameFinished()) {
             isMax = BitBoardFigures.blueToMove;
@@ -41,40 +49,6 @@ public class BitBoard {
             System.out.println(isGameFinished());
 
         }
-        /*
-        //ALpha Beta spielt gegen Monte Carlo Tree Search
-        for (int i = 0; i < 10; i++) {
-            importFEN("b0b0b0b0b0b0/1b0b0b0b0b0b01/8/8/8/8/1r0r0r0r0r0r01/r0r0r0r0r0r0 r");
-            boolean isMax;
-            BitMoves.initZobristTable();
-
-            while (!BitMoves.isGameFinished()) {
-                isMax = BitBoardFigures.blueToMove;
-
-                String move;
-                if (isMax) {
-                    //alpha beta plays blue
-                    move = alphaBetaWithTransposition(isMax, 4).move;
-                    System.out.println("alphaBeta is making the move: " + move);
-                } else {
-                    //mcts plays red
-                    //timelimit in ms
-                    move = mctsUCT(500);
-                    System.out.println("mcts is making the move: " + move);
-                }
-                BitMoves.makeMove(move, true);
-                //BitBoard.drawArray(BitBoardFigures.SingleRed, BitBoardFigures.SingleBlue, BitBoardFigures.DoubleRed, BitBoardFigures.DoubleBlue, BitBoardFigures.MixedRed, BitBoardFigures.MixedBlue);
-                BitBoardFigures.blueToMove = !BitBoardFigures.blueToMove;
-            }
-            if(!BitBoardFigures.blueToMove) {
-                System.out.println("Alpha Beta AI has won!");
-            } else {
-                System.out.println("MCTS AI has won!");
-            }
-            BitBoard.drawArray(BitBoardFigures.SingleRed, BitBoardFigures.SingleBlue, BitBoardFigures.DoubleRed, BitBoardFigures.DoubleBlue, BitBoardFigures.MixedRed, BitBoardFigures.MixedBlue);
-        }
-         */
-
     }
 
     /**
@@ -197,14 +171,13 @@ public class BitBoard {
     static public BitValueMoves alphaBetaRecursion(int depth, float alpha, float beta, boolean isMax) {
         if (depth == 0 || isGameFinished()) {
 //            System.out.println("copy: " + BitMoves.evaluatePosition(depth, SingleRed, SingleBlue, DoubleRed, DoubleBlue, MixedRed, MixedBlue));
-            return new BitValueMoves(BitBoard.evaluatePosition(depth, BitBoardFigures.SingleRed, BitBoardFigures.SingleBlue, BitBoardFigures.DoubleRed, BitBoardFigures.DoubleBlue, BitBoardFigures.MixedRed, BitBoardFigures.MixedBlue), null, depth);
+            return new BitValueMoves(BitBoard.evaluatePosition(depth), null, depth);
         }
 
         float value;
         String bestMove = null;
         int bestDepth = depth;
         if (isMax) {
-            //float value = alpha;
             value = -100000.0f;
             String moves;
 
@@ -229,13 +202,11 @@ public class BitBoard {
                 alpha = Math.max(alpha, value);
 
                 if (alpha >= beta) {
-                    //System.out.println("break");
                     break;
                 }
             }
 
         } else {
-            //float value = beta;
             value = 100000.0f;
             String moves;
 
@@ -261,7 +232,6 @@ public class BitBoard {
                 beta = Math.min(beta, value);
 
                 if (alpha >= beta) {
-                    //System.out.println("break");
                     break;
                 }
 
@@ -283,7 +253,7 @@ public class BitBoard {
      */
     static public BitValueMoves alphaBetaWithTranspositionTableRecursion(int depth, float alpha, float beta, boolean isMax) {
         if (depth == 0 || isGameFinished()) {
-            return new BitValueMoves(BitBoard.evaluatePosition(depth, BitBoardFigures.SingleRed, BitBoardFigures.SingleBlue, BitBoardFigures.DoubleRed, BitBoardFigures.DoubleBlue, BitBoardFigures.MixedRed, BitBoardFigures.MixedBlue), null, depth);
+            return new BitValueMoves(BitBoard.evaluatePosition(depth), null, depth);
         }
 
         long hashedBoard = BitMoves.hashBoard();
@@ -370,7 +340,12 @@ public class BitBoard {
         }
     }
 
-    //computationalBudget in ms
+    /**
+     * Performs Monte Carlo Tree Search with Upper Confidence bounds for Trees (UCT).
+     *
+     * @param computationalBudget the time budget for the search in milliseconds
+     * @return the best move found within the computational budget
+     */
     static public String mctsUCT(long computationalBudget){
         String possibleMoves;
         BitMoves.mctsBlueToMove = BitBoardFigures.blueToMove;
@@ -403,20 +378,16 @@ public class BitBoard {
             mctsBackup(v_i, playoutReward);
         }
 
-        //get best move
-        /*String bestMove;
-        try {
-            bestMove = root.children.entrySet().stream().reduce((entry1, entry2) -> entry1.getValue().getWinRate() > entry2.getValue().getWinRate() ? entry1 : entry2).get().getKey();
-        } catch (NoSuchElementException e){
-            return "";
-        }
-
-        return bestMove;*/
-
         return mctsBestChild(root, 0).sourceMove;
     }
 
-    private static MCTSNode mctsTreePolicy(MCTSNode root){
+    /**
+     * Executes the tree policy for MCTS to select the next node to explore.
+     *
+     * @param root the root node of the MCTS tree
+     * @return the selected node for further exploration
+     */
+    static MCTSNode mctsTreePolicy(MCTSNode root){
         MCTSNode nodePointer = root;
 
         //while(!nodePointer.isTerminal){
@@ -425,8 +396,8 @@ public class BitBoard {
                 return mctsExpand(nodePointer);
             } else {
                 nodePointer = mctsBestChild(nodePointer, Math.sqrt(2));
+                //TODO: Remove?
                 String move = BitMoves.makeMove(nodePointer.sourceMove, true);
-                //BitMoves.unmakeStack.push(move);
                 BitMoves.mctsBlueToMove = !BitMoves.mctsBlueToMove;
             }
         }
@@ -434,11 +405,16 @@ public class BitBoard {
         return nodePointer;
     }
 
-    private static MCTSNode mctsExpand(MCTSNode root){
+    /**
+     * Expands the current node by adding a new child node with a random untried move.
+     *
+     * @param root the node to expand
+     * @return the newly added child node
+     */
+    static MCTSNode mctsExpand(MCTSNode root){
         String randomUntriedMove = root.getRandomPlayoutMove();
 
         randomUntriedMove = BitMoves.makeMove(randomUntriedMove, true);
-        //BitMoves.unmakeStack.push(randomUntriedMove);
         BitMoves.mctsBlueToMove = !BitMoves.mctsBlueToMove;
 
         String possibleMoves;
@@ -454,7 +430,14 @@ public class BitBoard {
         return newChild;
     }
 
-    private static MCTSNode mctsBestChild(MCTSNode node, double uct_c){
+    /**
+     * Selects the best child node based on the UCT value.
+     *
+     * @param node the current node
+     * @param uct_c the exploration parameter for UCT
+     * @return the best child node
+     */
+    static MCTSNode mctsBestChild(MCTSNode node, double uct_c){
         try {
             return node.children.entrySet().stream().reduce((entry1, entry2) -> uctValue(entry1.getValue(), uct_c) > uctValue(entry2.getValue(), uct_c) ? entry1 : entry2).get().getValue();
         } catch (NoSuchElementException e){
@@ -462,11 +445,23 @@ public class BitBoard {
         }
     }
 
+    /**
+     * Calculates the UCT value for a given node.
+     *
+     * @param node the node for which to calculate the UCT value
+     * @param uct_c the exploration parameter for UCT
+     * @return the UCT value
+     */
     private static double uctValue(MCTSNode node, double uct_c){
         return node.playoutsWon / node.playoutsSum + uct_c * Math.sqrt((Math.log(node.parent.playoutsSum / node.playoutsSum)));
     }
 
-    private static int mctsDefaultPolicy(){
+    /**
+     * Executes the default policy (random playout) to simulate a game from the given state.
+     *
+     * @return the reward of the playout for the player that started (1 for win, 0 for draw, -1 for loss)
+     */
+    static int mctsDefaultPolicy(){
         String moves;
         while(!BitBoard.isGameFinished()){
             if (BitMoves.mctsBlueToMove){
@@ -475,8 +470,8 @@ public class BitBoard {
                 moves = BitMoves.possibleMovesRed(BitBoardFigures.SingleRed, BitBoardFigures.SingleBlue, BitBoardFigures.DoubleRed, BitBoardFigures.DoubleBlue, BitBoardFigures.MixedRed, BitBoardFigures.MixedBlue);
             }
 
-            //select move uniformly at random
-            //sometimes BitMoves.mctsBlueToMove is wrong, the try-catch fixes this bug
+            //Select move uniformly at random
+            //Sometimes BitMoves.mctsBlueToMove is wrong, the try-catch fixes this bug
             int offset;
             try {
                 offset = ThreadLocalRandom.current().nextInt(0, moves.length()/4);
@@ -493,12 +488,13 @@ public class BitBoard {
             String randomMove = moves.substring(offset*4, offset*4+4);
 
             randomMove = BitMoves.makeMove(randomMove, true);
-            //BitMoves.unmakeStack.push(randomMove);
             BitMoves.mctsBlueToMove = !BitMoves.mctsBlueToMove;
         }
 
         counter += 1;
-        if(counter == Long.MAX_VALUE - 1) System.out.println("overflowing");
+        if(counter == Long.MAX_VALUE - 1) {
+            System.out.println("overflowing");
+        }
 
         if(BitMoves.mctsBlueStarted){
             if(BitBoard.blueWon){
@@ -517,7 +513,13 @@ public class BitBoard {
         }
     }
 
-    private static void mctsBackup(MCTSNode leaf, int reward){
+    /**
+     * Backs up the result of a playout to update the tree with the new playout information.
+     *
+     * @param leaf the leaf node where the playout ended
+     * @param reward the reward obtained from the playout
+     */
+    static void mctsBackup(MCTSNode leaf, int reward){
         leaf.playoutsSum = 1;
         leaf.playoutsWon = reward;
         MCTSNode parent = leaf.parent;
@@ -533,43 +535,16 @@ public class BitBoard {
         BitBoardFigures.MixedBlue = BitBoardFigures.mctsMixedBlue;
         BitBoardFigures.DoubleRed = BitBoardFigures.mctsDoubleRed;
         BitBoardFigures.DoubleBlue = BitBoardFigures.mctsDoubleBlue;
-
-        /*while(!BitMoves.unmakeStack.isEmpty()){
-            try {
-                BitMoves.undoMove();
-            } catch (StringIndexOutOfBoundsException e){
-                //System.out.println(BitMoves.unmakeStack);
-                break;
-            }
-
-            //drawArray(BitBoardFigures.SingleRed,BitBoardFigures.SingleBlue,BitBoardFigures.DoubleRed,BitBoardFigures.DoubleBlue,BitBoardFigures.MixedRed,BitBoardFigures.MixedBlue);
-
-        }*/
-        //importFEN("b0b0b0b0b0b0/1b0b0b0b0b0b01/8/8/8/8/1r0r0r0r0r0r01/r0r0r0r0r0r0 b");
-
-
-
-        /*try {
-            Thread.sleep(50);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }*/
     }
 
     /**
      * Evaluates the current board position and returns a score indicating
      * the relative advantage for either player.
      * @param depth The current depth of the evaluation, used to adjust the score in case of game termination
-     * @param SingleRed A bitboard representing the positions of single Red pieces
-     * @param SingleBlue  A bitboard representing the positions of single Blue pieces
-     * @param DoubleRed A bitboard representing the positions of double Red pieces
-     * @param DoubleBlue A bitboard representing the positions of double Blue pieces
-     * @param MixedRed  A bitboard representing the positions of mixed Red pieces
-     * @param MixedBlue A bitboard representing the positions of mixed Blue pieces
      * @return A float value representing the evaluation score of the current position. Positive values indicate an
      *  advantage for Blue, while negative values indicate an advantage for Red. A value of zero indicates a draw.
      */
-    public static float evaluatePosition(int depth, long SingleRed, long SingleBlue, long DoubleRed, long DoubleBlue, long MixedRed, long MixedBlue) {
+    public static float evaluatePosition(int depth) {
         counter++;
         float value= 0;
         if(isGameFinished()) {
@@ -577,13 +552,12 @@ public class BitBoard {
                 return 0.0f;
             }
             else if (blueWon) {
-                return +10000.0f + depth;
+                return 10000.0f + depth;
             } else{
                 return -10000.0f - depth;
             }
         }
 
-        //System.out.println(valuesTable.get(1));
         long redAttacks = calculateAllAttacks(BitBoardFigures.SingleRed, BitBoardFigures.DoubleRed, BitBoardFigures.MixedRed, true);
         long blueAttacks = calculateAllAttacks(BitBoardFigures.SingleBlue, BitBoardFigures.DoubleBlue, BitBoardFigures.MixedBlue, false);
 
@@ -597,6 +571,15 @@ public class BitBoard {
         return value;
     }
 
+    /**
+     * Evaluates the given pieces based on their positions, value, protection, and specific figure type.
+     *
+     * @param piecePositions the positions of the pieces to evaluate
+     * @param pieceValue the base value of the piece
+     * @param allAttacks a long value representing all attack positions
+     * @param figure the character representing the type of the piece ('s', 'd', 'S', 'D')
+     * @return the evaluation value as a float
+     */
     public static float evaluatePieces(long piecePositions, double pieceValue, long allAttacks, char figure){
         double value = 0;
         double protectionBonusValue = 2.5;
@@ -652,6 +635,15 @@ public class BitBoard {
         return (float) value;
     }
 
+    /**
+     * Calculates all possible attacks from given positions for single, double, and mixed pieces.
+     *
+     * @param singlePositions the positions of single pieces
+     * @param doublePositions the positions of double pieces
+     * @param mixedPositions the positions of mixed pieces
+     * @param isRed indicates if the attacking pieces are red
+     * @return a long value representing all possible attack positions
+     */
     public static long calculateAllAttacks(long singlePositions, long doublePositions, long mixedPositions, boolean isRed){
         long attacks = 0;
         attacks |= calculateSingleAttacks(singlePositions, isRed);
@@ -660,6 +652,13 @@ public class BitBoard {
         return attacks;
     }
 
+    /**
+     * Calculates possible attacks for single pieces from given positions.
+     *
+     * @param singlePositions the positions of single pieces
+     * @param isRed indicates if the attacking pieces are red
+     * @return a long value representing the attack positions for single pieces
+     */
     public static long calculateSingleAttacks(long singlePositions, boolean isRed){
         long attacks = 0;
         if (isRed) {
@@ -673,6 +672,13 @@ public class BitBoard {
         return attacks;
     }
 
+    /**
+     * Calculates possible attacks for double pieces from given positions.
+     *
+     * @param doublePositions the positions of double pieces
+     * @param isRed indicates if the attacking pieces are red
+     * @return a long value representing the attack positions for double pieces
+     */
     public static long calculateDoubleAttacks(long doublePositions, boolean isRed){
         long attacks = 0;
         if (isRed) {
@@ -689,6 +695,13 @@ public class BitBoard {
         return attacks;
     }
 
+    /**
+     * Checks if a piece is protected by verifying if its position is covered by any attacks.
+     *
+     * @param piecePosition the position of the piece to check
+     * @param allAttacks a long value representing all attack positions
+     * @return {@code true} if the piece is protected, {@code false} otherwise
+     */
     public static boolean isPieceProtected(long piecePosition, long allAttacks) {
         return (piecePosition & allAttacks) != 0;
     }
@@ -848,7 +861,6 @@ public class BitBoard {
         while (fenString.charAt(charIndex) != ' ') {
 
             if (boardIndex == 0 || boardIndex == 7 || boardIndex == 56 || boardIndex == 63) {
-//                System.out.println("BoardIndex if 0 or 7: " + boardIndex);
                 boardIndex++;
                 continue;
             }

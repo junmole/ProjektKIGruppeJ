@@ -3,6 +3,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+//TODO: Wir werden das nicht im finalem abgaben behalten oder?
+
 public class Board {
     //board = new Figures[row][column]
     //board = new Figures[2][a]
@@ -240,7 +242,7 @@ public class Board {
     public HashMap<Field, Figures>[] deepCopyBoardMap() {
         HashMap<Field, Figures>[] newBoardMap = new HashMap[2];
         for (int i = 0; i < 2; i++) {
-            newBoardMap[i] = new HashMap();
+            newBoardMap[i] = new HashMap<>();
             for (Map.Entry<Field, Figures> entry : figureMap[i].entrySet()) {
                 newBoardMap[i].put(entry.getKey(), entry.getValue());
             }
@@ -374,27 +376,13 @@ public class Board {
                 Figures tmp = board[i][j];
 
                 switch (tmp){
-                    case SINGLE_RED -> {
-                        System.out.print(" r0 " + "|");
-                    }
-                    case SINGLE_BLUE -> {
-                        System.out.print(" b0 " + "|");
-                    }
-                    case DOUBLE_RED -> {
-                        System.out.print(" rr " + "|");
-                    }
-                    case DOUBLE_BLUE -> {
-                        System.out.print(" bb "+ "|");
-                    }
-                    case MIXED_RED -> {
-                        System.out.print(" br " + "|");
-                    }
-                    case MIXED_BLUE -> {
-                        System.out.print(" rb " + "|");
-                    }
-                    case null -> {
-                        System.out.print("    " + "|");
-                    }
+                    case SINGLE_RED -> System.out.print(" r0 " + "|");
+                    case SINGLE_BLUE -> System.out.print(" b0 " + "|");
+                    case DOUBLE_RED -> System.out.print(" rr " + "|");
+                    case DOUBLE_BLUE -> System.out.print(" bb "+ "|");
+                    case MIXED_RED -> System.out.print(" br " + "|");
+                    case MIXED_BLUE -> System.out.print(" rb " + "|");
+                    case null -> System.out.print("    " + "|");
                 }
             }
             System.out.println();

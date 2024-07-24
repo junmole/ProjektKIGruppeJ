@@ -1,15 +1,27 @@
 import com.google.gson.Gson;
-
 import java.util.Scanner;
 
+/**
+ * The Client class is responsible for communicating with the server and managing the game state.
+ * It continuously runs a loop to send and receive data from the server, and updates the game board accordingly.
+ */
 public class Client {
 
+    /**
+     * Main method to run the client application. It continuously calls runClient method in an infinite loop.
+     *
+     * @param args command-line arguments
+     */
+    @SuppressWarnings("InfiniteLoopStatement")
     public static void main(String[] args) {
         while (true) {
             runClient();
         }
     }
 
+    /**
+     * Runs the client, handles communication with the server, and manages the game state.
+     */
     public static void runClient() {
         Network n = new Network();
         int player = Integer.parseInt(n.getP());

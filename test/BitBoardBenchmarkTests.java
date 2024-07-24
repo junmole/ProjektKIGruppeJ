@@ -1,4 +1,15 @@
+/**
+ * The BitBoardBenchmarkTests class contains methods to benchmark the performance of the Alpha-Beta pruning algorithm
+ * in different game states (start, mid, and end game). It evaluates the execution time and the number of states visited.
+ */
 public class BitBoardBenchmarkTests {
+
+    /**
+     * The main method is the entry point of the benchmark tests.
+     * It sets up different game states and runs the alpha-beta tests for various depths.
+     *
+     * @param args command-line arguments (not used)
+     */
     public static void main(String[] args) {
 
 /*
@@ -81,6 +92,13 @@ public class BitBoardBenchmarkTests {
                 + "Number of visited states pro ms: " + BitBoard.counter / (totalTime) + "\n" + "Best move: " + vm.move + "\n");
     }
 
+    /**
+     * Runs the Alpha-Beta pruning algorithm on a given game position at a specified search depth.
+     * Measures the execution time and the number of visited states.
+     *
+     * @param gamePosition the description of the game position (e.g., "Start Game", "Mid Game", "End Game")
+     * @param depth the depth of the search tree for the Alpha-Beta algorithm
+     */
     private static void alphaBetaTest(String gamePosition, int depth) {
         BitBoard.counter = 0;
 

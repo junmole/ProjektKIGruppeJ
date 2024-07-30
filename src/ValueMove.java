@@ -1,5 +1,3 @@
-//TODO: won't need in final submission
-
 public class ValueMove {
     public float v;
     public Move move;

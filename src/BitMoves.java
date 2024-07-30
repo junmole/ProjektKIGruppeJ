@@ -45,7 +45,7 @@ public class BitMoves {
 
         BitBoard.importFEN("2b0b02/1b0b0b0b0b02/8/8/8/8/3r0r0r0r01/1r0r0r02 b");
         long hashedBoard1 = hashBoard();
-        System.out.println(hashedBoard1);
+        System.out.println("Hash:" + hashedBoard1);
 
         BitBoard.importFEN("2b0b02/1b0b0b0b03/6b01/8/8/8/3r0r0r0r01/1r0r0r02 b");
         long hashedBoard2 = hashBoard();
@@ -270,7 +270,6 @@ public class BitMoves {
         return knightBlueMoves;
     }
 
-    //TODO : warum benutzen wir nicht PossibleMovesBlue?
 
     public static boolean hasPossibleMovesBlue(long SingleRed, long SingleBlue, long DoubleRed, long DoubleBlue, long MixedRed, long MixedBlue) {
         BLUE_CAPTURE = SingleRed | DoubleRed | MixedRed;

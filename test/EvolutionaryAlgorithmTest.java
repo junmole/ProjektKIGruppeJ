@@ -3,6 +3,9 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Test Class for EvolutionaryAlgorithm
+ */
 class EvolutionaryAlgorithmTest {
 
     @BeforeEach

@@ -8,6 +8,9 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Test Class for Network
+ */
 class NetworkTest {
 
     private Network network;

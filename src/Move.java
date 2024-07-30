@@ -1,6 +1,5 @@
 import java.util.Objects;
 
-//TODO: Won't need in final submission?
 public class Move {
     public final int start_row;
     public final char start_col;

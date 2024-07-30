@@ -3,7 +3,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-//TODO: Wir werden das nicht im finalem abgaben behalten oder?
 
 public class Board {
     //board = new Figures[row][column]

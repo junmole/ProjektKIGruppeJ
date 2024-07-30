@@ -396,8 +396,7 @@ public class BitBoard {
                 return mctsExpand(nodePointer);
             } else {
                 nodePointer = mctsBestChild(nodePointer, Math.sqrt(2));
-                //TODO: Remove?
-                String move = BitMoves.makeMove(nodePointer.sourceMove, true);
+                BitMoves.makeMove(nodePointer.sourceMove, true);
                 BitMoves.mctsBlueToMove = !BitMoves.mctsBlueToMove;
             }
         }

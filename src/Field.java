@@ -1,6 +1,5 @@
 import java.util.Objects;
 
-//TODO: Is in final submission?
 /**
  * The Field class represents a field on a grid with a row and a column.
  */

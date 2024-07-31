@@ -12,24 +12,6 @@ public class BitBoardBenchmarkTests {
      */
     public static void main(String[] args) {
 
-/*
-        evaluationTestsDepth1("Start Game", startGame);
-        evaluationTestsDepth1("Mid Game", midGame);
-        evaluationTestsDepth1("End Game", endGame);
-
-        miniMaxTest("Start Game", startGame, 2);
-        miniMaxTest("Start Game", startGame, 3);
-        miniMaxTest("Start Game", startGame, 4);
-
-        miniMaxTest("Mid Game", midGame, 2);
-        miniMaxTest("Mid Game", midGame, 3);
-        miniMaxTest("Mid Game", midGame, 4);
-
-        miniMaxTest("End Game", endGame, 2);
-        miniMaxTest("End Game", endGame, 3);
-        miniMaxTest("End Game", endGame, 4);
-
- */
         BitBoard.importFEN("b0b0b0b0b0b0/1b0b0b0b0b0b01/8/8/8/8/1r0r0r0r0r0r01/r0r0r0r0r0r0 b");
         benchmarkTests("Start Game");
 

@@ -1,7 +1,10 @@
+package BitBoardTest;
+
 import org.junit.jupiter.api.Test;
-
 import static org.junit.jupiter.api.Assertions.*;
-
+import BitBoard.BitBoardFigures;
+import BitBoard.BitMoves;
+import BitBoard.BitBoard;
 /**
  * Test Class for BitMoves
  */
@@ -82,11 +85,11 @@ public class BitMovesTest {
         long singleBlue = BitBoardFigures.SingleBlue;
         long doubleBlue = BitBoardFigures.DoubleBlue;
 
-        // Move b1-b2 to form blue stack
+        // Board.Move b1-b2 to form blue stack
         String move = "0111ss";
         BitMoves.makeMove(move, true);
 
-        //Unmake Move
+        //Unmake Board.Move
         BitMoves.unmakeStack.push(move);
         BitMoves.undoMove();
 

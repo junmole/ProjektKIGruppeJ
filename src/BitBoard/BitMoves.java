@@ -1,3 +1,5 @@
+package BitBoard;
+
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -20,16 +22,16 @@ public class BitMoves {
 
     static String startFigure = "", endFigure = "";
 
-    static final Stack<String> unmakeStack = new Stack<>();
+    public static final Stack<String> unmakeStack = new Stack<>();
     static boolean mctsBlueStarted;
-    static boolean mctsBlueToMove;
+    public static boolean mctsBlueToMove;
     public static int moveCounter;
 
     public static long aiRunningTime = 0L, aiRunningTime1 = 0L, aiRunningTime2 = 0L;
     public static int redFigureCount, blueFigureCount;
     public static final long[][] zobristTable = new long[64][6];
     public static final Map<Long, TranspositionValues> transpositionTable = new HashMap<>();
-    static final Map<Long, Integer> gameStateHistory = new HashMap<>();
+    public static final Map<Long, Integer> gameStateHistory = new HashMap<>();
 
 
     /**
@@ -119,21 +121,21 @@ public class BitMoves {
                 singleRedMoves += "" + (i / 8 + 1) + (i % 8+1) + (i / 8) + (i % 8);
             }
         }
-        //Move 1 forward
+        //Board.Move 1 forward
         SINGLERED_MOVES =(singleRed >> 8) & EMPTY_RED & ~EDGE_7 &~EDGE_0;
         for (int i = Long.numberOfTrailingZeros(SINGLERED_MOVES); i < 64 - Long.numberOfLeadingZeros(SINGLERED_MOVES); i++) {
             if (((SINGLERED_MOVES >> i) & 1) == 1) {
                 singleRedMoves += "" + (i / 8 + 1) + (i % 8) + (i / 8) + (i % 8);
             }
         }
-        //Move 1 left
+        //Board.Move 1 left
         SINGLERED_MOVES = (singleRed >>1) & EMPTY_RED & ~FILE_A & ~EDGE_56;
         for (int i = Long.numberOfTrailingZeros(SINGLERED_MOVES); i < 64 - Long.numberOfLeadingZeros(SINGLERED_MOVES); i++) {
             if (((SINGLERED_MOVES >> i) & 1) == 1) {
                 singleRedMoves += "" + (i / 8) + (i % 8 + 1) + (i / 8) + (i % 8);
             }
         }
-        //Move 1 right
+        //Board.Move 1 right
         SINGLERED_MOVES = (singleRed << 1) & EMPTY_RED & ~FILE_H & ~EDGE_63;
         for (int i = Long.numberOfTrailingZeros(SINGLERED_MOVES); i < 64 - Long.numberOfLeadingZeros(SINGLERED_MOVES); i++) {
             if (((SINGLERED_MOVES >> i) & 1) == 1) {
@@ -206,21 +208,21 @@ public class BitMoves {
                 singleBlueMoves += "" + (i / 8 - 1) + (i % 8 - 1) + (i / 8) + (i % 8);
             }
         }
-        //Move 1 forward
+        //Board.Move 1 forward
         SINGLEBLUE_MOVES = (singleBlue << 8) & EMPTY_BLUE & ~EDGE_63&~EDGE_56;
         for (int i = Long.numberOfTrailingZeros(SINGLEBLUE_MOVES); i < 64 - Long.numberOfLeadingZeros(SINGLEBLUE_MOVES); i++) {
             if (((SINGLEBLUE_MOVES >> i) & 1) == 1) {
                 singleBlueMoves += "" + (i / 8 - 1) + (i % 8) + (i / 8) + (i % 8);
             }
         }
-        //Move 1 right
+        //Board.Move 1 right
         SINGLEBLUE_MOVES = (singleBlue << 1) & EMPTY_BLUE & ~FILE_H &~EDGE_7;
         for (int i = Long.numberOfTrailingZeros(SINGLEBLUE_MOVES); i < 64 - Long.numberOfLeadingZeros(SINGLEBLUE_MOVES); i++) {
             if (((SINGLEBLUE_MOVES >> i) & 1) == 1) {
                 singleBlueMoves += "" + (i / 8) + (i % 8 - 1) + (i / 8) + (i % 8);
             }
         }
-        //Move 1 left
+        //Board.Move 1 left
         SINGLEBLUE_MOVES = (singleBlue >> 1) & EMPTY_BLUE & ~FILE_A & ~EDGE_0;
         for (int i = Long.numberOfTrailingZeros(SINGLEBLUE_MOVES); i < 64 - Long.numberOfLeadingZeros(SINGLEBLUE_MOVES); i++) {
             if (((SINGLEBLUE_MOVES >> i) & 1) == 1) {
@@ -307,21 +309,21 @@ public class BitMoves {
                 return true;
             }
         }
-        //Move 1 forward
+        //Board.Move 1 forward
         SINGLERED_MOVES =(singleRed >> 8) & EMPTY_RED & ~EDGE_7 &~EDGE_0;
         for (int i = Long.numberOfTrailingZeros(SINGLERED_MOVES); i < 64 - Long.numberOfLeadingZeros(SINGLERED_MOVES); i++) {
             if (((SINGLERED_MOVES >> i) & 1) == 1) {
                 return true;
             }
         }
-        //Move 1 left
+        //Board.Move 1 left
         SINGLERED_MOVES = (singleRed >>1) & EMPTY_RED & ~FILE_A & ~EDGE_56;
         for (int i = Long.numberOfTrailingZeros(SINGLERED_MOVES); i < 64 - Long.numberOfLeadingZeros(SINGLERED_MOVES); i++) {
             if (((SINGLERED_MOVES >> i) & 1) == 1) {
                 return true;
             }
         }
-        //Move 1 right
+        //Board.Move 1 right
         SINGLERED_MOVES = (singleRed << 1) & EMPTY_RED & ~FILE_H & ~EDGE_63;
         for (int i = Long.numberOfTrailingZeros(SINGLERED_MOVES); i < 64 - Long.numberOfLeadingZeros(SINGLERED_MOVES); i++) {
             if (((SINGLERED_MOVES >> i) & 1) == 1) {
@@ -379,21 +381,21 @@ public class BitMoves {
                 return true;
             }
         }
-        //Move 1 forward
+        //Board.Move 1 forward
         SINGLEBLUE_MOVES = (singleBlue << 8) & EMPTY_BLUE & ~EDGE_63&~EDGE_56;
         for (int i = Long.numberOfTrailingZeros(SINGLEBLUE_MOVES); i < 64 - Long.numberOfLeadingZeros(SINGLEBLUE_MOVES); i++) {
             if (((SINGLEBLUE_MOVES >> i) & 1) == 1) {
                 return true;
             }
         }
-        //Move 1 right
+        //Board.Move 1 right
         SINGLEBLUE_MOVES = (singleBlue << 1) & EMPTY_BLUE & ~FILE_H &~EDGE_7;
         for (int i = Long.numberOfTrailingZeros(SINGLEBLUE_MOVES); i < 64 - Long.numberOfLeadingZeros(SINGLEBLUE_MOVES); i++) {
             if (((SINGLEBLUE_MOVES >> i) & 1) == 1) {
                 return true;
             }
         }
-        //Move 1 left
+        //Board.Move 1 left
         SINGLEBLUE_MOVES = (singleBlue >> 1) & EMPTY_BLUE & ~FILE_A & ~EDGE_0;
         for (int i = Long.numberOfTrailingZeros(SINGLEBLUE_MOVES); i < 64 - Long.numberOfLeadingZeros(SINGLEBLUE_MOVES); i++) {
             if (((SINGLEBLUE_MOVES >> i) & 1) == 1) {

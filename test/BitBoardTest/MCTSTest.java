@@ -1,3 +1,9 @@
+package BitBoardTest;
+
+import BitBoard.MCTSNode;
+import BitBoard.BitBoardFigures;
+import BitBoard.BitMoves;
+import BitBoard.BitBoard;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

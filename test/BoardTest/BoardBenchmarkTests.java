@@ -1,6 +1,10 @@
+package BoardTest;
+
+import Board.Board;
+import Board.Move;
 import java.util.Set;
 
-public class BenchmarkTests {
+public class BoardBenchmarkTests {
     public static void main(String[] args) {
 
         Board startGame = new Board();
@@ -56,7 +60,7 @@ public class BenchmarkTests {
         long stopTime = System.nanoTime();
 
         float averageTime = (float) (stopTime - startTime) / (1000000);
-        System.out.println("Average time for Move Generator " + gamePosition + ": " + averageTime + " ms \n");
+        System.out.println("Average time for Board.Move Generator " + gamePosition + ": " + averageTime + " ms \n");
 
     }
 

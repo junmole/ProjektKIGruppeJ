@@ -1,3 +1,5 @@
+package BitBoard;
+
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -5,14 +7,14 @@ import java.util.NoSuchElementException;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
- * The {@code BitBoard} class manages the game state and AI for the board game, Jump Board,
+ * The {@code BitBoard} class manages the game state and AI for the board game, Jump Board.Board,
  * implemented using bitboards. It includes methods for evaluating the board,
  * handling game states, and executing the alpha-beta pruning algorithm with and without a
  * transposition table as well as MCTS algorithm.
  */
 public class BitBoard {
 
-    static boolean blueWon;
+    public static boolean blueWon;
     public static int counter;
     public static boolean draw;
 
@@ -41,8 +43,8 @@ public class BitBoard {
             BitMoves.initZobristTable();
             BitValueMoves vm = alphaBetaWithTransposition(isMax);
             String move = vm.move;
-            System.out.println("Move " + vm.move);
-            System.out.println("Move made: " + moveToString(vm.move) + " on expected eval " + vm.v);
+            System.out.println("Board.Move " + vm.move);
+            System.out.println("Board.Move made: " + moveToString(vm.move) + " on expected eval " + vm.v);
             BitMoves.makeMove(move, true);
             BitBoard.drawArray(BitBoardFigures.SingleRed, BitBoardFigures.SingleBlue, BitBoardFigures.DoubleRed, BitBoardFigures.DoubleBlue, BitBoardFigures.MixedRed, BitBoardFigures.MixedBlue);
             BitBoardFigures.blueToMove = !BitBoardFigures.blueToMove;
@@ -387,7 +389,7 @@ public class BitBoard {
      * @param root the root node of the MCTS tree
      * @return the selected node for further exploration
      */
-    static MCTSNode mctsTreePolicy(MCTSNode root){
+    public static MCTSNode mctsTreePolicy(MCTSNode root){
         MCTSNode nodePointer = root;
 
         //while(!nodePointer.isTerminal){
@@ -410,7 +412,7 @@ public class BitBoard {
      * @param root the node to expand
      * @return the newly added child node
      */
-    static MCTSNode mctsExpand(MCTSNode root){
+    public static MCTSNode mctsExpand(MCTSNode root){
         String randomUntriedMove = root.getRandomPlayoutMove();
 
         randomUntriedMove = BitMoves.makeMove(randomUntriedMove, true);
@@ -460,7 +462,7 @@ public class BitBoard {
      *
      * @return the reward of the playout for the player that started (1 for win, 0 for draw, -1 for loss)
      */
-    static int mctsDefaultPolicy(){
+    public static int mctsDefaultPolicy(){
         String moves;
         while(!BitBoard.isGameFinished()){
             if (BitMoves.mctsBlueToMove){
@@ -518,7 +520,7 @@ public class BitBoard {
      * @param leaf the leaf node where the playout ended
      * @param reward the reward obtained from the playout
      */
-    static void mctsBackup(MCTSNode leaf, int reward){
+    public static void mctsBackup(MCTSNode leaf, int reward){
         leaf.playoutsSum = 1;
         leaf.playoutsWon = reward;
         MCTSNode parent = leaf.parent;
@@ -927,7 +929,7 @@ public class BitBoard {
      * @param move The move string to convert
      * @return A string representing the move in a human-readable format
      */
-    static String moveToString(String move) {
+    public static String moveToString(String move) {
         if (move != null) {
             int coltp = Character.getNumericValue(move.charAt(1));
             char start_col = (char) (coltp + 97);

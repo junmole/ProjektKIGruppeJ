@@ -1,3 +1,5 @@
+package BitBoard;
+
 /**
  * The TranspositionValues class stores information used in the transposition table for an alpha-beta pruning algorithm.
  * It holds a BitValueMoves object and the alpha-beta bounds.

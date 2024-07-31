@@ -1,3 +1,5 @@
+package Board;
+
 import java.util.Objects;
 
 public class Move {

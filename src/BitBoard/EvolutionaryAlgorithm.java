@@ -1,3 +1,5 @@
+package BitBoard;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -8,12 +10,12 @@ import java.util.Random;
  * The algorithm evolves a population of weight vectors over several generations, selecting, crossing over,
  * and mutating individuals to find an optimal solution.
  */
-class EvolutionaryAlgorithm {
+public class EvolutionaryAlgorithm {
 
     // Constants defining the configuration of the evolutionary algorithm
     static final int NUM_GENERATIONS = 2;
-    static final int POPULATION_SIZE = 2;
-    static final int NUM_WEIGHTS = 6;
+    public static final int POPULATION_SIZE = 2;
+    public static final int NUM_WEIGHTS = 6;
     static final double MUTATION_RATE = 0.1;
     static final Random RANDOM = new Random();
     static final String startgame = "b0b0b0b0b0b0/1b0b0b0b0b0b01/8/8/8/8/1r0r0r0r0r0r01/r0r0r0r0r0r0 b";
@@ -33,7 +35,7 @@ class EvolutionaryAlgorithm {
             "1bb4/1b0b05/b01b0bb4/1b01b01b02/3r01rr2/b0r0r02rr2/4r01rr1/4r0r0 b",
             "6/7b0/8/8/1r06/4b03/2rr1rrr02/5r0 b",
             "6/r07/2rr5/r07/2b05/8/b0bb6/6 r");
-    static int[] score = new int[2];
+    public static int[] score = new int[2];
 
 
     /**
@@ -104,7 +106,7 @@ class EvolutionaryAlgorithm {
      * @param numWeights the number of weights in each individual
      * @return a list of weight vectors representing the initial population
      */
-    static List<double[]> initializePopulation(int size, int numWeights) {
+    public static List<double[]> initializePopulation(int size, int numWeights) {
         List<double[]> population = new ArrayList<>();
         for (int i = 0; i < size; i++) {
             double[] individual = new double[numWeights];
@@ -126,7 +128,7 @@ class EvolutionaryAlgorithm {
      * @param population the population of individuals
      * @return a list of fitness scores corresponding to each individual in the population
      */
-    static List<Integer> evaluatePopulation(List<double[]> population) {
+    public static List<Integer> evaluatePopulation(List<double[]> population) {
         int populationSize = population.size();
         List<Integer> fitnesses = new ArrayList<>(Collections.nCopies(populationSize, 0));
 
@@ -228,7 +230,7 @@ class EvolutionaryAlgorithm {
      * @param fitnesses the fitness scores of the population
      * @return the selected individual
      */
-    static double[] select(List<double[]> population, List<Integer> fitnesses) {
+    public static double[] select(List<double[]> population, List<Integer> fitnesses) {
         int totalFitness = fitnesses.stream().mapToInt(Integer::intValue).sum();
         if (totalFitness <= 0) {
             // If total fitness is 0 or less, return a random individual
@@ -276,7 +278,7 @@ class EvolutionaryAlgorithm {
      * @param parent2 the second parent individual
      * @return the child individual resulting from the crossover
      */
-    static double[] crossover(double[] parent1, double[] parent2) {
+    public static double[] crossover(double[] parent1, double[] parent2) {
         double[] child = new double[parent1.length];
         for (int i = 0; i < parent1.length; i++) {
             child[i] = Math.round((parent1[i] + parent2[i]) / 2); // Average and round to nearest integer

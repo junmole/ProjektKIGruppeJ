@@ -1,3 +1,5 @@
+package BitBoard;
+
 /**
  * The BitValueMoves class represents a move in a board game, including its value, string representation, and depth.
  */

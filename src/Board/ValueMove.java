@@ -1,3 +1,5 @@
+package Board;
+
 public class ValueMove {
     public float v;
     public Move move;

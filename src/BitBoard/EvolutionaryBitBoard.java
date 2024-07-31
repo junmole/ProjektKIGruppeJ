@@ -1,7 +1,9 @@
+package BitBoard;
+
 import static java.lang.Long.bitCount;
 
 /**
- * The EvolutionaryBitBoard class provides the main methods for managing the state and evaluation of a game using bitboards.
+ * The BitBoard.EvolutionaryBitBoard class provides the main methods for managing the state and evaluation of a game using bitboards.
  * It includes functions to evaluate board positions, make and undo moves, and simulate game outcomes using an evolutionary algorithm approach.
  */
 public class EvolutionaryBitBoard {
@@ -23,7 +25,7 @@ public class EvolutionaryBitBoard {
 
 
     /**
-     * Main method for the EvolutionaryBitBoard class, used for testing and development purposes.
+     * Main method for the BitBoard.EvolutionaryBitBoard class, used for testing and development purposes.
      *
      * @param args command line arguments (not used)
      */
@@ -72,10 +74,10 @@ public class EvolutionaryBitBoard {
 
             String move = vm.move;
 
-//         System.out.println("before Move: " + BitMoves.gameStateHistory);
-//         System.out.println("Move made: " + moveToString(vm.move) + " on expected eval " + vm.v);
+//         System.out.println("before Board.Move: " + BitMoves.gameStateHistory);
+//         System.out.println("Board.Move made: " + moveToString(vm.move) + " on expected eval " + vm.v);
             BitMoves.makeMove(move, true);
-//          System.out.println("after Move: " + BitMoves.gameStateHistory);
+//          System.out.println("after Board.Move: " + BitMoves.gameStateHistory);
 //          drawArray(BitBoardFigures.SingleRed, BitBoardFigures.SingleBlue, BitBoardFigures.DoubleRed, BitBoardFigures.DoubleBlue, BitBoardFigures.MixedRed, BitBoardFigures.MixedBlue);
             BitBoardFigures.blueToMove = !BitBoardFigures.blueToMove;
         }

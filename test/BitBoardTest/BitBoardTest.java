@@ -1,6 +1,11 @@
-import org.junit.jupiter.api.BeforeEach;
+package BitBoardTest;
+
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
+import BitBoard.BitBoardFigures;
+import BitBoard.BitMoves;
+import BitBoard.BitBoard;
+import BitBoard.BitValueMoves;
 
 /**
  * Test Class for BitBoard

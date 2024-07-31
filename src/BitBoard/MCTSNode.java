@@ -1,3 +1,5 @@
+package BitBoard;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
@@ -9,14 +11,14 @@ import java.util.concurrent.ThreadLocalRandom;
  */
 public class MCTSNode {
     final MCTSNode parent;
-    final String sourceMove;
+    public final String sourceMove;
     String unexploredMovesLeft;
-    double playoutsWon;
-    double playoutsSum;
+    public double playoutsWon;
+    public double playoutsSum;
     boolean isTerminal;
     //is explored if this node and every child node (recursively) is explored
-    boolean isExpanded;
-    final Map<String, MCTSNode> children = new HashMap<>();
+    public boolean isExpanded;
+    public final Map<String, MCTSNode> children = new HashMap<>();
 
     /**
      * Constructs a new MCTSNode.

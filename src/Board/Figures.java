@@ -1,3 +1,5 @@
+package Board;
+
 public enum Figures {
     SINGLE_RED, SINGLE_BLUE, DOUBLE_RED, DOUBLE_BLUE, MIXED_RED, MIXED_BLUE
 }

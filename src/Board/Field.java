@@ -1,7 +1,9 @@
+package Board;
+
 import java.util.Objects;
 
 /**
- * The Field class represents a field on a grid with a row and a column.
+ * The Board.Field class represents a field on a grid with a row and a column.
  */
 public class Field {
     /**
@@ -14,7 +16,7 @@ public class Field {
     public final char col;
 
     /**
-     * Constructs a Field object with the specified row and column.
+     * Constructs a Board.Field object with the specified row and column.
      *
      * @param row the row of the field
      * @param col the column of the field
@@ -25,10 +27,10 @@ public class Field {
     }
 
     /**
-     * Returns a string representation of the Field object.
+     * Returns a string representation of the Board.Field object.
      * The format is the column followed by the row incremented by 1.
      *
-     * @return a string representation of the Field object
+     * @return a string representation of the Board.Field object
      */
     @Override
     public String toString() {
@@ -37,7 +39,7 @@ public class Field {
 
     /**
      * Indicates whether some other object is "equal to" this one.
-     * The other object is considered equal if it is an instance of Field and
+     * The other object is considered equal if it is an instance of Board.Field and
      * has the same row and column.
      *
      * @param o the reference object with which to compare

@@ -1,3 +1,5 @@
+package Board;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -5,8 +7,8 @@ import java.util.Set;
 
 
 public class Board {
-    //board = new Figures[row][column]
-    //board = new Figures[2][a]
+    //board = new Board.Figures[row][column]
+    //board = new Board.Figures[2][a]
     //column uses ascii char values
     public Figures[][] board = new Figures[8][8];
     public static int counter = 0;
@@ -39,7 +41,7 @@ public class Board {
             Move move = vm.move;
             System.out.println();
             System.out.println("took: " + (end - start) + " ms");
-            System.out.println("Move made: " + move + " on expected eval " + vm.v);
+            System.out.println("Board.Move made: " + move + " on expected eval " + vm.v);
             board.makeMove(move);
             board.boardToString();
         }

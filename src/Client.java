@@ -1,5 +1,7 @@
 import com.google.gson.Gson;
 import java.util.Scanner;
+import BitBoard.BitBoardFigures;
+import BitBoard.BitBoard;
 
 /**
  * The Client class is responsible for communicating with the server and managing the game state.
@@ -47,7 +49,7 @@ public class Client {
                     // allow to only give input when it is your turn
                     if (player == 0 && game.player1) {
                         // not necessary while running, helpful for debug
-                        System.out.println("New Board: " + game.board);
+                        System.out.println("New Board.Board: " + game.board);
 
                         BitBoard.importFEN(game.board);
                         String input = BitBoard.alphaBeta(BitBoardFigures.blueToMove).moveToString();
@@ -59,7 +61,7 @@ public class Client {
                         // Send data via network
                         n.send(data);
                     } else if (player == 1 && game.player2) {
-                        System.out.println("New Board: " + game.board);
+                        System.out.println("New Board.Board: " + game.board);
 
                         BitBoard.importFEN(game.board);
                         String input = BitBoard.alphaBeta(BitBoardFigures.blueToMove).moveToString();

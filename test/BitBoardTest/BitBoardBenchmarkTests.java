@@ -1,5 +1,11 @@
+package BitBoardTest;
+
+import BitBoard.BitBoardFigures;
+import BitBoard.BitMoves;
+import BitBoard.BitBoard;
+import BitBoard.BitValueMoves;
 /**
- * The BitBoardBenchmarkTests class contains methods to benchmark the performance of the Alpha-Beta pruning algorithm
+ * The BitBoardTest.BitBoardBenchmarkTests class contains methods to benchmark the performance of the Alpha-Beta pruning algorithm
  * in different game states (start, mid, and end game). It evaluates the execution time and the number of states visited.
  */
 public class BitBoardBenchmarkTests {
@@ -11,33 +17,14 @@ public class BitBoardBenchmarkTests {
      * @param args command-line arguments (not used)
      */
     public static void main(String[] args) {
-
-/*
-        evaluationTestsDepth1("Start Game", startGame);
-        evaluationTestsDepth1("Mid Game", midGame);
-        evaluationTestsDepth1("End Game", endGame);
-
-        miniMaxTest("Start Game", startGame, 2);
-        miniMaxTest("Start Game", startGame, 3);
-        miniMaxTest("Start Game", startGame, 4);
-
-        miniMaxTest("Mid Game", midGame, 2);
-        miniMaxTest("Mid Game", midGame, 3);
-        miniMaxTest("Mid Game", midGame, 4);
-
-        miniMaxTest("End Game", endGame, 2);
-        miniMaxTest("End Game", endGame, 3);
-        miniMaxTest("End Game", endGame, 4);
-
- */
         BitBoard.importFEN("b0b0b0b0b0b0/1b0b0b0b0b0b01/8/8/8/8/1r0r0r0r0r0r01/r0r0r0r0r0r0 b");
-        benchmarkTests("Start Game");
+        MoveGeneratorTest("Start Game");
 
         BitBoard.importFEN("2b01b01/2bb5/3b02b01/3r0brb0r01/1b06/8/2r0rr4/2r01r0r0 r");
-        benchmarkTests("Mid Game");
+        MoveGeneratorTest("Mid Game");
 
         BitBoard.importFEN("6/1b06/1r0b02bb2/2r02b02/8/5rr2/2r03r01/6 b");
-        benchmarkTests("End Game");
+        MoveGeneratorTest("End Game");
 
         BitBoard.importFEN("b0b0b0b0b0b0/1b0b0b0b0b0b01/8/8/8/8/1r0r0r0r0r0r01/r0r0r0r0r0r0 b");
         //da um alles erstmal zu initialisieren, weil sonst das Erste Ergebnis verfälscht werden würde
@@ -58,23 +45,23 @@ public class BitBoardBenchmarkTests {
 
 
         BitBoard.importFEN("b0b0b0b0b0b0/1b0b0b0b0b0b01/8/8/8/8/1r0r0r0r0r0r01/r0r0r0r0r0r0 b");
-        alphaBetaWithTranspositiontTableTest("Start Game",3);
-        alphaBetaWithTranspositiontTableTest("Start Game",5);
-        alphaBetaWithTranspositiontTableTest("Start Game",7);
+        alphaBetaWithTranspositionTableTest("Start Game",3);
+        alphaBetaWithTranspositionTableTest("Start Game",5);
+        alphaBetaWithTranspositionTableTest("Start Game",7);
 
         BitBoard.importFEN("2b01b01/2bb5/3b02b01/3r0brb0r01/1b06/8/2r0rr4/2r01r0r0 r");
-        alphaBetaWithTranspositiontTableTest("Mid Game",3);
-        alphaBetaWithTranspositiontTableTest("Mid Game",5);
-        alphaBetaWithTranspositiontTableTest("Mid Game",7);
+        alphaBetaWithTranspositionTableTest("Mid Game",3);
+        alphaBetaWithTranspositionTableTest("Mid Game",5);
+        alphaBetaWithTranspositionTableTest("Mid Game",7);
 
         BitBoard.importFEN("6/1b06/1r0b02bb2/2r02b02/8/5rr2/2r03r01/6 b");
-        alphaBetaWithTranspositiontTableTest("End Game",3);
-        alphaBetaWithTranspositiontTableTest("End Game",5);
-        alphaBetaWithTranspositiontTableTest("End Game",7);
+        alphaBetaWithTranspositionTableTest("End Game",3);
+        alphaBetaWithTranspositionTableTest("End Game",5);
+        alphaBetaWithTranspositionTableTest("End Game",7);
 
     }
 
-    private static void alphaBetaWithTranspositiontTableTest(String gamePosition, int depth) {
+    private static void alphaBetaWithTranspositionTableTest(String gamePosition, int depth) {
         BitBoard.counter = 0;
 
         long startTime = System.nanoTime();
@@ -96,7 +83,7 @@ public class BitBoardBenchmarkTests {
      * Runs the Alpha-Beta pruning algorithm on a given game position at a specified search depth.
      * Measures the execution time and the number of visited states.
      *
-     * @param gamePosition the description of the game position (e.g., "Start Game", "Mid Game", "End Game")
+     * @param gamePosition the description of the game position (e.g., "Start Game", "Mid-Game", "End Game")
      * @param depth the depth of the search tree for the Alpha-Beta algorithm
      */
     private static void alphaBetaTest(String gamePosition, int depth) {
@@ -117,7 +104,7 @@ public class BitBoardBenchmarkTests {
     }
 
 
-    private static void benchmarkTests(String gamePosition) {
+    private static void MoveGeneratorTest(String gamePosition) {
 
         long startTime = System.nanoTime();
         for (int i = 0; i < 1000; i++) {

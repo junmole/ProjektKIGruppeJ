@@ -1,5 +1,3 @@
-/*
-
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -97,13 +95,14 @@ public class TestMoveGenerator {
 
     @ParameterizedTest
     @MethodSource("provideFenStrings2")
-    public void getPossibleMovesVariant2(String fen, Set<Move> expectedMoves) {
+    public  static void getPossibleMovesVariant2(String fen, Set<Move> expectedMoves) {
         int blueToMove = (fen.charAt(fen.length()-1) == 'b' ? 1 : 0);
         String init = fen.substring(0, fen.length() - 2);
-        Board.fenToBoard(init);
+        Board board = new Board();
+        board.fenToBoard(init);
 
-        Set<Move> moves = Board.getPossibleMoves(blueToMove);
-        moves = Board.getLegalMoves(moves);
+        Set<Move> moves = board.getPossibleMoves(blueToMove);
+        moves = board.getLegalMoves(moves);
         // Find moves in the expected set but not in the actual moves
         Set<Move> finalMoves = moves;
         Set<Move> missingMoves = expectedMoves.stream()
@@ -128,4 +127,3 @@ public class TestMoveGenerator {
 
 }
 
- */

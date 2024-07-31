@@ -19,7 +19,7 @@ class Network {
             in = new BufferedReader(new InputStreamReader(client.getInputStream()));
             out = new PrintWriter(client.getOutputStream(), true);
             p = readPlayerNumber(); //alternative for in.readLine();
-            //p = in.readLine(); TODO: use this if python server.py is changed
+            //p = in.readLine();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -62,7 +62,7 @@ class Network {
         try {
             out.println(data);
             return readResponse(); //alternative for in.readLine();
-            //return in.readLine(); TODO: use this if python server.py is changed
+            //return in.readLine();
         } catch (Exception e) {
             e.printStackTrace();
         }

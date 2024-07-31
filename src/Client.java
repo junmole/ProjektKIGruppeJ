@@ -37,9 +37,6 @@ public class Client {
                         // not necessary while running, helpful for debug
                         System.out.println("New Board: " + game.board);
 
-                        //TODO: add your AI getMove() call here
-                        //answer must have format: start_field-end_field like E7-F7
-
                         BitBoard.importFEN(game.board);
                         String input = BitBoard.alphaBeta(BitBoardFigures.blueToMove).moveToString();
                         //BitMoves.makeMove(input, true);
@@ -50,7 +47,6 @@ public class Client {
                         // Send data via network
                         n.send(data);
                     } else if (player == 1 && game.player2) {
-                        //TODO: do the same here
                         System.out.println("New Board: " + game.board);
 
                         BitBoard.importFEN(game.board);

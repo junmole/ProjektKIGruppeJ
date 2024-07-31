@@ -229,7 +229,6 @@ public class Board {
         return new ValueMove(value, bestMove, bestDepth);
     }
 
-    //TODO: replace with unmake move
     public Figures[][] deepCopyBoard() {
         Figures[][] newBoard = new Figures[8][8];
         for (int i = 0; i < 8; i++) {
@@ -238,7 +237,6 @@ public class Board {
         return newBoard;
     }
 
-    //TODO: replace with unmake move
     public HashMap<Field, Figures>[] deepCopyBoardMap() {
         HashMap<Field, Figures>[] newBoardMap = new HashMap[2];
         for (int i = 0; i < 2; i++) {
@@ -250,8 +248,6 @@ public class Board {
         return newBoardMap;
     }
 
-
-    //TODO: implement evaluation function, group T FEN 6/4bb3/8/8/4b0r0b01/8/8/6 b; Stellungsbeschreibung: Blau gewinnt in einem Zug durch Blocken not implemented
     public float evaluatePosition(int depth){
         counter++;
         if(figureMap[0].isEmpty()) return 1000.0f + depth;
@@ -371,8 +367,6 @@ public class Board {
         }
     }
 
-    //assumes the fen has correct syntax; TODO
-
     public void boardToString(){
         for(int i=7; i>-1; i--){
             System.out.print((i+1) + "|");
@@ -414,7 +408,6 @@ public class Board {
         //index 0 are red figures, index 1 are blue figures
         if(figureMap[0].isEmpty() || figureMap[1].isEmpty()) return true;
 
-        //TODO clean this up
         Set<Move> moves = getPossibleMoves(blueToMove);
         if (getLegalMoves(moves).isEmpty()) return true;
 
@@ -503,8 +496,6 @@ public class Board {
             Figures start = board[move.start_row][move.start_col - 'a'];
             Figures target;
 
-
-            //TODO adjust for ascii
             int i = move.end_row;
             int j = move.end_col - 'a';
 

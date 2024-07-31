@@ -29,6 +29,8 @@ public class BitBoardBenchmarkTests {
         benchmarkTests("End Game");
 
         BitBoard.importFEN("b0b0b0b0b0b0/1b0b0b0b0b0b01/8/8/8/8/1r0r0r0r0r0r01/r0r0r0r0r0r0 b");
+        //da um alles erstmal zu initialisieren, weil sonst das Erste Ergebnis verfälscht werden würde
+        BitBoard.alphaBetaBenchmark(true, 1);
         alphaBetaTest("Start Game",3);
         alphaBetaTest("Start Game",5);
         alphaBetaTest("Start Game",7);
@@ -68,7 +70,9 @@ public class BitBoardBenchmarkTests {
 
         boolean isMax = BitBoardFigures.blueToMove;
 
-        BitValueMoves vm = BitBoard.alphaBetaWithTransposition(isMax);
+        BitMoves.initZobristTable();
+
+        BitValueMoves vm = BitBoard.alphaBetaTranspositionBenchmark(isMax, depth);
 
         long stopTime = System.nanoTime();
 
@@ -84,7 +88,7 @@ public class BitBoardBenchmarkTests {
 
         boolean isMax = BitBoardFigures.blueToMove;
 
-        BitValueMoves vm = BitBoard.alphaBeta(isMax);
+        BitValueMoves vm = BitBoard.alphaBetaBenchmark(isMax, depth);
 
         long stopTime = System.nanoTime();
 

@@ -111,7 +111,6 @@ public class EvolutionaryBitBoard {
                 timeDepth = 8; //~3.3s on full board
                 if(BitMoves.moveCounter < 5){
                     timeDepth = 6; //fast opening
-                    //timeDepth = 6; //TODO: DEBUG HERE AND COMMENT OUT
                 }
             }
             BitValueMoves move = alphaBetaRecursionNormal(timeDepth, -100000.0f, +100000.0f, isMax);
@@ -145,7 +144,6 @@ public class EvolutionaryBitBoard {
                 timeDepth = 8; //~3.3s on full board
                 if(BitMoves.moveCounter < 5){
                     timeDepth = 6; //fast opening
-                    //timeDepth = 6; //TODO: DEBUG HERE AND COMMENT OUT
                 }
             }
             BitValueMoves move = alphaBetaRecursionComplex(timeDepth, -100000.0f, +100000.0f, isMax);

@@ -109,7 +109,6 @@ public class BitBoard {
             timeDepth = 8; //~3.3s on full board
             if (BitMoves.moveCounter < 5) {
                 timeDepth = 6; //fast opening
-                //TODO: DEBUG HERE AND COMMENT OUT
             }
         }
 
@@ -153,13 +152,35 @@ public class BitBoard {
             timeDepth = 8; //~3.3s on full board
             if (BitMoves.moveCounter < 5) {
                 timeDepth = 6; //fast opening
-                //timeDepth = 6; //TODO: DEBUG HERE AND COMMENT OUT
             }
         }
 
         BitValueMoves move = alphaBetaWithTranspositionTableRecursion(timeDepth, -100000.0f, +100000.0f, isMax);
         long endTime = System.currentTimeMillis();
         BitMoves.aiRunningTime += (endTime - startTime);
+        return move;
+    }
+
+    /**
+     * Same method as alphaBetaWithTranspostition, but wihtout time Management
+     * used for Benchmartests for AlphaBeta with Transposition Table.
+     *
+     * @param isMax A boolean indicating if the current player is maximizing or minimizing
+     * @return A {@code BitValueMoves} object representing the best move and its evaluation score
+     */
+    static public BitValueMoves alphaBetaTranspositionBenchmark(boolean isMax, int depth) {
+        BitValueMoves move = alphaBetaWithTranspositionTableRecursion(depth, -100000.0f, +100000.0f, isMax);
+        return move;
+    }
+
+    /**
+     * Same method as alphaBeta, but wihtout time Management, used for Benchmartests for AlphaBeta.
+     *
+     * @param isMax A boolean indicating if the current player is a maximizing or minimizing player
+     * @return A {@code BitValueMoves} object representing the best move, its evaluation score and its depth.
+     */
+    static public BitValueMoves alphaBetaBenchmark(boolean isMax, int depth) {
+        BitValueMoves move = alphaBetaRecursion(depth, -100000.0f, +100000.0f, isMax);
         return move;
     }
 
@@ -304,7 +325,7 @@ public class BitBoard {
             }
 
             BitValueMoves bitValueMoves = new BitValueMoves(value, bestMove, bestDepth);
-            hashedBoard = BitMoves.hashBoard(); //TODO: maybe remove
+            hashedBoard = BitMoves.hashBoard();
             BitMoves.addToTranspositionTable(hashedBoard, new TranspositionValues(bitValueMoves, alpha, beta));
             return bitValueMoves;
 
@@ -342,7 +363,7 @@ public class BitBoard {
             }
 
             BitValueMoves bitValueMoves = new BitValueMoves(value, bestMove, bestDepth);
-            hashedBoard = BitMoves.hashBoard(); //TODO: maybe remove
+            hashedBoard = BitMoves.hashBoard();
             BitMoves.addToTranspositionTable(hashedBoard, new TranspositionValues(bitValueMoves, alpha, beta));
             return bitValueMoves;
 

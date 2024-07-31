@@ -1,3 +1,5 @@
+import java.util.Set;
+
 public class BenchmarkTests {
     public static void main(String[] args) {
 
@@ -13,9 +15,10 @@ public class BenchmarkTests {
         endGame.fenToBoard("6/1b06/1r0b02bb2/2r02b02/8/5rr2/2r03r01/6");
         endGame.blueToMove  = 1;
 
-        evaluationTestsDepth1("Start Game", startGame);
-        evaluationTestsDepth1("Mid Game", midGame);
-        evaluationTestsDepth1("End Game", endGame);
+
+        moveGeneratorBenchmark("Start Game", startGame);
+        moveGeneratorBenchmark("Mid Game", midGame);
+        moveGeneratorBenchmark("End Game", endGame);
 
         miniMaxTest("Start Game", startGame, 2);
         miniMaxTest("Start Game", startGame, 3);
@@ -29,33 +32,31 @@ public class BenchmarkTests {
         miniMaxTest("End Game", endGame, 3);
         miniMaxTest("End Game", endGame, 4);
 
-        alphaBetaTest("Start Game", startGame, 2);
         alphaBetaTest("Start Game", startGame, 3);
-        alphaBetaTest("Start Game", startGame, 4);
+        alphaBetaTest("Start Game", startGame, 5);
+        alphaBetaTest("Start Game", startGame, 7);
 
-        alphaBetaTest("Mid Game", midGame, 2);
         alphaBetaTest("Mid Game", midGame, 3);
-        alphaBetaTest("Mid Game", midGame, 4);
+        alphaBetaTest("Mid Game", midGame, 5);
+        alphaBetaTest("Mid Game", midGame, 7);
 
-        alphaBetaTest("End Game", endGame, 2);
         alphaBetaTest("End Game", endGame, 3);
-        alphaBetaTest("End Game", endGame, 4);
+        alphaBetaTest("End Game", endGame, 5);
+        alphaBetaTest("End Game", endGame, 7);
 
     }
 
-    private static void evaluationTestsDepth1(String gamePosition, Board board){
-        boolean isMax = board.blueToMove == 1;
-
+    private static void moveGeneratorBenchmark(String gamePosition, Board board){
 
         long startTime = System.nanoTime();
-        for (int i = 0; i < 10000; i++) {
-            Board.miniMax(board, isMax, 1);
+        for (int i = 0; i < 1000; i++) {
+            Set<Move> moves = board.getPossibleMoves(board.blueToMove);
+            moves = board.getLegalMoves(moves);
         }
         long stopTime = System.nanoTime();
 
-        float averageTime = (float) (stopTime - startTime) / (10000*1000000);
-        System.out.println("Average time for Evaluation " + gamePosition + ": " + averageTime + " ms \n"
-        + "Best move: " + Board.miniMax(board, true, 1).move + "\n");
+        float averageTime = (float) (stopTime - startTime) / (1000000);
+        System.out.println("Average time for Move Generator " + gamePosition + ": " + averageTime + " ms \n");
 
     }
 

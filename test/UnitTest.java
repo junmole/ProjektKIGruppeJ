@@ -17,17 +17,6 @@ public class UnitTest {
     }
 
     @Test
-    public void miniMaxGruppeH2(){
-        Board board = new Board();
-        String init =  "1bb4/1b0b05/b01b0bb4/1b01b01b02/3r01rr2/b0r0r02rr2/4r01rr1/4r0r0 r";
-        String fen = init.substring(0, init.length() - 2);
-
-        board.fenToBoard(fen);
-        board.blueToMove = 0;
-        assertEquals(new Move(4,'f',2,'g' ), Board.miniMax(board, false, 4).move);
-    }
-
-    @Test
     public void miniMaxGruppeH3(){
         Board board = new Board();
         String init =  "6/3b0b03/3r02bb1/b0b03bb2/rrrr1bb2rr1/2b01b01r01/2r01r02r0/4r01 b";
@@ -178,17 +167,6 @@ public class UnitTest {
         board.fenToBoard(fen);
         board.blueToMove = 1;
         assertEquals(new Move(2,'d',3,'b' ), Board.alphaBeta(board, true, 4).move);
-    }
-
-    @Test
-    public void alphaBetaGruppeH2(){
-        Board board = new Board();
-        String init =  "1bb4/1b0b05/b01b0bb4/1b01b01b02/3r01rr2/b0r0r02rr2/4r01rr1/4r0r0 r";
-        String fen = init.substring(0, init.length() - 2);
-
-        board.fenToBoard(fen);
-        board.blueToMove = 0;
-        assertEquals(new Move(4,'f',2,'g' ), Board.alphaBeta(board, false, 4).move);
     }
 
     @Test

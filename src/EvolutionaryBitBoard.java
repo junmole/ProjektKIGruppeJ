@@ -1,5 +1,9 @@
 import static java.lang.Long.bitCount;
 
+/**
+ * The EvolutionaryBitBoard class provides the main methods for managing the state and evaluation of a game using bitboards.
+ * It includes functions to evaluate board positions, make and undo moves, and simulate game outcomes using an evolutionary algorithm approach.
+ */
 public class EvolutionaryBitBoard {
     static double protectionBonusValue;
     static double SingleValue;
@@ -18,6 +22,11 @@ public class EvolutionaryBitBoard {
             Square58, Square59, Square60, Square61, Square62, Square63;
 
 
+    /**
+     * Main method for the EvolutionaryBitBoard class, used for testing and development purposes.
+     *
+     * @param args command line arguments (not used)
+     */
     public static void main(String[] args) {
         /* Für Vergleich der Bewertungsfunktionen
         importFEN("b0b0b0b0b0b0/1b0b0b0b0b0b01/8/8/8/8/1r0r0r0r0r0r01/r0r0r0r0r0r0 b");
@@ -35,6 +44,15 @@ public class EvolutionaryBitBoard {
 
     }
 
+    /**
+     * Starts a game from a given FEN string, using specified weights for the blue and red players,
+     * and a specified depth for search.
+     *
+     * @param fen the FEN string representing the starting position
+     * @param blue the weight parameters for the blue player
+     * @param red the weight parameters for the red player
+     * @param depth the search depth for the game simulation
+     */
     public static void startGame(String fen, double[] blue, double[] red, int depth){
         BitMoves.gameStateHistory.clear();
         importFEN(fen);
@@ -67,6 +85,11 @@ public class EvolutionaryBitBoard {
         //System.out.println("total Time: " + (totalTime/1000000) +"ms");
     }
 
+    /**
+     * Sets the evaluation values for game evaluation based on the provided parameters.
+     *
+     * @param parameters an array containing the evaluation parameters for the game
+     */
     static public void setEvaluationValues(double[] parameters){
         SingleValue = parameters[0];
         DoubleValue = parameters[1];
@@ -77,10 +100,26 @@ public class EvolutionaryBitBoard {
 
     }
 
+    /**
+     * Implements the alpha-beta pruning algorithm to evaluate moves and decide the best move.
+     *
+     * @param isMax a boolean indicating if the current move is a maximizing move
+     * @param depth the depth of the search
+     * @return a BitValueMoves object containing the value of the best move and the move itself
+     */
     static public BitValueMoves alphaBeta(boolean isMax, int depth) {
         return alphaBetaRecursion(depth, -100000.0f, +100000.0f, isMax);
     }
 
+    /**
+     * A version of the alpha-beta pruning algorithm used for comparing evaluation functions.
+     * This version also handles different time depths and panic modes.
+     *
+     * @param isMax a boolean indicating if the current move is a maximizing move
+     * @param depth the depth of the search
+     * @param evaluation a boolean indicating whether to use the complex evaluation function
+     * @return a BitValueMoves object containing the value of the best move and the move itself
+     */
     static public BitValueMoves alphaBetaComparison(boolean isMax, int depth, boolean evaluation) {
         BitMoves.moveCounter += 1;
         int timeDepth = 4;
@@ -153,6 +192,15 @@ public class EvolutionaryBitBoard {
         }
     }
 
+    /**
+     * Recursive method implementing the alpha-beta pruning algorithm.
+     *
+     * @param depth the depth of the search
+     * @param alpha the alpha value for pruning
+     * @param beta the beta value for pruning
+     * @param isMax a boolean indicating if the current move is a maximizing move
+     * @return a BitValueMoves object containing the value of the best move and the move itself
+     */
     static public BitValueMoves alphaBetaRecursion(int depth, float alpha, float beta, boolean isMax) {
         if (depth == 0 || isGameFinished()) {
             return new BitValueMoves(evaluatePosition(depth, BitBoardFigures.SingleRed, BitBoardFigures.SingleBlue, BitBoardFigures.DoubleRed, BitBoardFigures.DoubleBlue, BitBoardFigures.MixedRed, BitBoardFigures.MixedBlue), null, depth);
@@ -223,15 +271,25 @@ public class EvolutionaryBitBoard {
         return new BitValueMoves(value, bestMove, bestDepth);
     }
 
+    /**
+     * Implements the alpha-beta pruning algorithm with a simplified evaluation function.
+     *
+     * @param depth the depth of the search
+     * @param alpha the alpha value for pruning
+     * @param beta the beta value for pruning
+     * @param isMax a boolean indicating if the current move is a maximizing move
+     * @return a BitValueMoves object containing the value of the best move and the move itself
+     */
     static public BitValueMoves alphaBetaRecursionNormal(int depth, float alpha, float beta, boolean isMax) {
         if (depth == 0 || isGameFinished()) {
             return new BitValueMoves(evaluatePositionSimple(depth, BitBoardFigures.SingleRed, BitBoardFigures.SingleBlue, BitBoardFigures.DoubleRed, BitBoardFigures.DoubleBlue, BitBoardFigures.MixedRed, BitBoardFigures.MixedBlue), null, depth);
         }
 
+        float value;
+        String bestMove = null;
+        int bestDepth = depth;
         if (isMax) {
-            float value = -100000.0f;
-            String bestMove = null;
-            int bestDepth = depth;
+            value = -100000.0f;
             String moves;
 
 
@@ -259,11 +317,8 @@ public class EvolutionaryBitBoard {
                     break;
                 }
             }
-            return new BitValueMoves(value, bestMove, bestDepth);
         } else {
-            float value = 100000.0f;
-            String bestMove = null;
-            int bestDepth = depth;
+            value = 100000.0f;
             String moves;
 
 
@@ -290,19 +345,29 @@ public class EvolutionaryBitBoard {
                 }
 
             }
-            return new BitValueMoves(value, bestMove, bestDepth);
         }
+        return new BitValueMoves(value, bestMove, bestDepth);
     }
 
+    /**
+     * Implements the alpha-beta pruning algorithm with a complex evaluation function.
+     *
+     * @param depth the depth of the search
+     * @param alpha the alpha value for pruning
+     * @param beta the beta value for pruning
+     * @param isMax a boolean indicating if the current move is a maximizing move
+     * @return a BitValueMoves object containing the value of the best move and the move itself
+     */
     static public BitValueMoves alphaBetaRecursionComplex(int depth, float alpha, float beta, boolean isMax) {
         if (depth == 0 || isGameFinished()) {
             return new BitValueMoves(evaluatePositionComplex(depth), null, depth);
         }
 
+        float value;
+        String bestMove = null;
+        int bestDepth = depth;
         if (isMax) {
-            float value = -100000.0f;
-            String bestMove = null;
-            int bestDepth = depth;
+            value = -100000.0f;
             String moves;
 
 
@@ -330,11 +395,8 @@ public class EvolutionaryBitBoard {
                     break;
                 }
             }
-            return new BitValueMoves(value, bestMove, bestDepth);
         } else {
-            float value = 100000.0f;
-            String bestMove = null;
-            int bestDepth = depth;
+            value = 100000.0f;
             String moves;
 
 
@@ -361,10 +423,15 @@ public class EvolutionaryBitBoard {
                 }
 
             }
-            return new BitValueMoves(value, bestMove, bestDepth);
         }
+        return new BitValueMoves(value, bestMove, bestDepth);
     }
 
+    /**
+     * Imports a game state from a FEN string.
+     *
+     * @param fenString the FEN string representing the board state
+     */
     public static void importFEN(String fenString) {
         BitBoardFigures.SingleRed = 0;
         BitBoardFigures.SingleBlue = 0;
@@ -436,6 +503,18 @@ public class EvolutionaryBitBoard {
         BitBoardFigures.blueToMove = (fenString.charAt(++charIndex) == 'b');
     }
 
+    /**
+     * A simplified evaluation function for quick assessment of a position.
+     *
+     * @param depth the depth of the search
+     * @param SingleRed the bitboard for single red pieces
+     * @param SingleBlue the bitboard for single blue pieces
+     * @param DoubleRed the bitboard for double red pieces
+     * @param DoubleBlue the bitboard for double blue pieces
+     * @param MixedRed the bitboard for mixed red pieces
+     * @param MixedBlue the bitboard for mixed blue pieces
+     * @return the evaluation score of the position
+     */
     public static float evaluatePositionSimple(int depth, long SingleRed, long SingleBlue, long DoubleRed, long DoubleBlue, long MixedRed, long MixedBlue){
         BitBoard.counter++;
         float value= 0;
@@ -489,6 +568,12 @@ public class EvolutionaryBitBoard {
         return value;
     }
 
+    /**
+     * A more detailed evaluation function for assessing a position using an advanced evaluation method.
+     *
+     * @param depth the depth of the search
+     * @return the evaluation score of the position
+     */
     public static float evaluatePositionFunction2(int depth){
         BitBoard.counter++;
         float value= 0;
@@ -497,7 +582,7 @@ public class EvolutionaryBitBoard {
                 return 0.0f;
             }
             else if (BitBoard.blueWon) {
-                return +10000.0f + depth;
+                return 10000.0f + depth;
             } else{
                 return -10000.0f - depth;
             }
@@ -516,6 +601,18 @@ public class EvolutionaryBitBoard {
         return value;
     }
 
+    /**
+     * Evaluates the current position using a comprehensive evaluation function.
+     *
+     * @param depth the depth of the search
+     * @param SingleRed the bitboard for single red pieces
+     * @param SingleBlue the bitboard for single blue pieces
+     * @param DoubleRed the bitboard for double red pieces
+     * @param DoubleBlue the bitboard for double blue pieces
+     * @param MixedRed the bitboard for mixed red pieces
+     * @param MixedBlue the bitboard for mixed blue pieces
+     * @return the evaluation score of the position
+     */
     public static float evaluatePosition(int depth, long SingleRed, long SingleBlue, long DoubleRed, long DoubleBlue, long MixedRed, long MixedBlue){
         BitBoard.counter++;
         float value= 0;
@@ -583,6 +680,12 @@ public class EvolutionaryBitBoard {
         return value;
     }
 
+    /**
+     * A complex evaluation function that includes additional heuristics for a more refined analysis.
+     *
+     * @param depth the depth of the search
+     * @return the evaluation score of the position
+     */
     public static float evaluatePositionComplex(int depth){
         BitBoard.counter++;
         float value= 0;
@@ -591,7 +694,7 @@ public class EvolutionaryBitBoard {
                 return 0.0f;
             }
             else if (BitBoard.blueWon) {
-                return +10000.0f + depth;
+                return 10000.0f + depth;
             } else{
                 return -10000.0f - depth;
             }
@@ -611,6 +714,13 @@ public class EvolutionaryBitBoard {
         return value;
     }
 
+    /**
+     * Calculates the attack positions for single pieces.
+     *
+     * @param singlePositions the bitboard representing the positions of single pieces
+     * @param isRed a boolean indicating if the pieces are red
+     * @return a long value representing the bitboard of attack positions
+     */
     public static long calculateSingleAttacks(long singlePositions, boolean isRed){
         long attacks = 0;
         if (isRed) {
@@ -624,6 +734,13 @@ public class EvolutionaryBitBoard {
         return attacks;
     }
 
+    /**
+     * Calculates the attack positions for double pieces.
+     *
+     * @param doublePositions the bitboard representing the positions of double pieces
+     * @param isRed a boolean indicating if the pieces are red
+     * @return a long value representing the bitboard of attack positions
+     */
     public static long calculateDoubleAttacks(long doublePositions, boolean isRed){
         long attacks = 0;
         if (isRed) {
@@ -640,6 +757,15 @@ public class EvolutionaryBitBoard {
         return attacks;
     }
 
+    /**
+     * Calculates all attack positions for both single and double pieces.
+     *
+     * @param singlePositions the bitboard representing the positions of single pieces
+     * @param doublePositions the bitboard representing the positions of double pieces
+     * @param mixedPositions the bitboard representing the positions of mixed pieces
+     * @param isRed a boolean indicating if the pieces are red
+     * @return a long value representing the bitboard of all attack positions
+     */
     public static long calculateAllAttacks(long singlePositions, long doublePositions, long mixedPositions, boolean isRed){
         long attacks = 0;
         attacks |= calculateSingleAttacks(singlePositions, isRed);
@@ -648,6 +774,15 @@ public class EvolutionaryBitBoard {
         return attacks;
     }
 
+    /**
+     * Evaluates the pieces on the board based on their positions, value, and potential attacks.
+     *
+     * @param piecePositions the bitboard representing the positions of the pieces
+     * @param pieceValue the base value of the pieces
+     * @param allAttacks the bitboard representing all attack positions
+     * @param figure a character indicating the type of pieces ('s' for single, 'd' for double, 'S' for single red, 'D' for double red)
+     * @return the evaluation score for the pieces
+     */
     public static float evaluatePieces(long piecePositions, double pieceValue, long allAttacks, char figure){
         double[]valuesTable2 ={0.0f, Square2, Square3, Square4, Square4, Square3, Square2, 0.0f,
                 Square5, Square6, Square7, Square9, Square10, Square10, Square9, Square5,
@@ -721,6 +856,15 @@ public class EvolutionaryBitBoard {
         return (float) value;
     }
 
+    /**
+     * Evaluates pieces using an alternative evaluation function.
+     *
+     * @param piecePositions the bitboard representing the positions of the pieces
+     * @param pieceValue the base value of the pieces
+     * @param allAttacks the bitboard representing all attack positions
+     * @param figure a character indicating the type of pieces ('s' for single, 'd' for double, 'S' for single red, 'D' for double red)
+     * @return the evaluation score for the pieces
+     */
     public static float evaluatePiecesFunction2(long piecePositions, double pieceValue, long allAttacks, char figure){
         double value = 0;
         while (piecePositions != 0) {
@@ -749,10 +893,23 @@ public class EvolutionaryBitBoard {
         return (float) value;
     }
 
+
+    /**
+     * Checks if a piece is protected by other pieces.
+     *
+     * @param piecePosition the bitboard representing the position of the piece
+     * @param allAttacks the bitboard representing all attack positions
+     * @return true if the piece is protected, false otherwise
+     */
     public static boolean isPieceProtected(long piecePosition, long allAttacks) {
         return (piecePosition & allAttacks) != 0;
     }
 
+    /**
+     * Determines if the game has ended based on the current board state.
+     *
+     * @return true if the game is finished, false otherwise
+     */
     public static boolean isGameFinished(){
         // Constants for specific bitboard configurations
         final long BLUE_WIN_CONDITION = 9079256848778919936L; // Binary number with the first 6 bits as 1
@@ -805,6 +962,9 @@ public class EvolutionaryBitBoard {
 
     }
 
+    /**
+     * Benchmarks different evaluation functions by comparing their execution times and results.
+     */
     public static void benchmarkEvaluation(){
         protectionBonusValue = 0;
         SingleValue = 10;
@@ -856,6 +1016,12 @@ public class EvolutionaryBitBoard {
 
     }
 
+    /**
+     * Converts a move in numeric format to a human-readable string format.
+     *
+     * @param move the move in numeric format
+     * @return the move in human-readable string format
+     */
     static String moveToString(String move) {
         if (move != null) {
             int coltp = Character.getNumericValue(move.charAt(1));

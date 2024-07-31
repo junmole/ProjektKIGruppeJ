@@ -3,10 +3,16 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
+/**
+ * This class implements an evolutionary algorithm to optimize a set of weights for the jumpBoard AI.
+ * The algorithm evolves a population of weight vectors over several generations, selecting, crossing over,
+ * and mutating individuals to find an optimal solution.
+ */
 class EvolutionaryAlgorithm {
 
-    static final int NUM_GENERATIONS = 30;
-    static final int POPULATION_SIZE = 10;
+    // Constants defining the configuration of the evolutionary algorithm
+    static final int NUM_GENERATIONS = 2;
+    static final int POPULATION_SIZE = 2;
     static final int NUM_WEIGHTS = 6;
     static final double MUTATION_RATE = 0.1;
     static final Random RANDOM = new Random();
@@ -30,6 +36,11 @@ class EvolutionaryAlgorithm {
     static int[] score = new int[2];
 
 
+    /**
+     * The main method to start the evolutionary algorithm.
+     *
+     * @param args command line arguments (not used)
+     */
     public static void main(String[] args) {
         //startEvolutionaryAlgorithm();
         /*
@@ -48,6 +59,10 @@ class EvolutionaryAlgorithm {
          */
     }
 
+    /**
+     * Starts the evolutionary algorithm, initializing a population and evolving it over a set number of generations.
+     * It selects the best individuals based on their fitness scores and performs crossover and mutation to create new generations.
+     */
     static void startEvolutionaryAlgorithm(){
         List<double[]> population = initializePopulation(POPULATION_SIZE, NUM_WEIGHTS);
 
@@ -75,13 +90,20 @@ class EvolutionaryAlgorithm {
         }
 
 
-        double[] bestIndividual = population.get(0);
+        double[] bestIndividual = population.getFirst();
         System.out.println("Best individual: ");
         for (double weight : bestIndividual) {
             System.out.print(weight + " ");
         }
     }
 
+    /**
+     * Initializes a population with random weight vectors.
+     *
+     * @param size the size of the population
+     * @param numWeights the number of weights in each individual
+     * @return a list of weight vectors representing the initial population
+     */
     static List<double[]> initializePopulation(int size, int numWeights) {
         List<double[]> population = new ArrayList<>();
         for (int i = 0; i < size; i++) {
@@ -98,6 +120,12 @@ class EvolutionaryAlgorithm {
         return population;
     }
 
+    /**
+     * Evaluates the fitness of each individual in the population by playing games against each other.
+     *
+     * @param population the population of individuals
+     * @return a list of fitness scores corresponding to each individual in the population
+     */
     static List<Integer> evaluatePopulation(List<double[]> population) {
         int populationSize = population.size();
         List<Integer> fitnesses = new ArrayList<>(Collections.nCopies(populationSize, 0));
@@ -117,6 +145,11 @@ class EvolutionaryAlgorithm {
         return fitnesses;
     }
 
+    /**
+     * Plays a series of games between individuals in the population to determine their fitness.
+     *
+     * @param population the population of individuals
+     */
     static void playAgainst(List<double[]> population){
         int populationSize = population.size();
         List<Integer> fitnesses = new ArrayList<>(Collections.nCopies(populationSize, 0));
@@ -143,6 +176,12 @@ class EvolutionaryAlgorithm {
         }
     }
 
+    /**
+     * Plays a series of games between two individuals across multiple starting positions and depths.
+     *
+     * @param individual1 the first individual
+     * @param individual2 the second individual
+     */
     static void playGames(double[] individual1, double[] individual2) {
         for (int i = 1; i < 7; i++) {
             for (String startPosition : START_POSITIONS) {
@@ -159,23 +198,36 @@ class EvolutionaryAlgorithm {
  */
     }
 
+    /**
+     * Simulates a game between two individuals with specified starting positions and depth.
+     *
+     * @param blue the weights for the blue player
+     * @param red the weights for the red player
+     * @param startPosition the starting position of the game
+     * @param isBlue boolean indicating if the blue player moves first
+     * @param depth the depth of search for the game simulation
+     */
     static void playGame(double[] blue, double[] red, String startPosition, boolean isBlue, int depth) {
         EvolutionaryBitBoard.startGame(startPosition, blue, red, depth);
 
         if(BitBoard.draw){
             score[0] += 1;
             score[1] += 1;
-            //System.out.println("draw");
         } else if (BitBoard.blueWon) {
-            //System.out.println("blue won");
             score[0] += 2;
 
-        } else if (!BitBoard.blueWon) {
-            //System.out.println("red won");
+        } else {
             score[1] += 2;
         }
     }
 
+    /**
+     * Selects an individual from the population based on their fitness using a roulette wheel selection method.
+     *
+     * @param population the population of individuals
+     * @param fitnesses the fitness scores of the population
+     * @return the selected individual
+     */
     static double[] select(List<double[]> population, List<Integer> fitnesses) {
         int totalFitness = fitnesses.stream().mapToInt(Integer::intValue).sum();
         if (totalFitness <= 0) {
@@ -192,12 +244,19 @@ class EvolutionaryAlgorithm {
                 return population.get(i);
             }
         }
-        return population.get(population.size() - 1); // Should not reach here
+        return population.getLast(); // Should not reach here
     }
 
+    /**
+     * Selects the best individual from the population based on their fitness.
+     *
+     * @param population the population of individuals
+     * @param fitnesses the fitness scores of the population
+     * @return the individual with the highest fitness
+     */
     static double[] selectBest(List<double[]> population, List<Integer> fitnesses) {
         int bestFitnessIndex = 0;
-        int bestFitness = fitnesses.get(0);
+        int bestFitness = fitnesses.getFirst();
 
         for (int i = 1; i < fitnesses.size(); i++) {
             if (fitnesses.get(i) > bestFitness) {
@@ -209,6 +268,14 @@ class EvolutionaryAlgorithm {
         return population.get(bestFitnessIndex);
     }
 
+    /**
+     * Performs crossover between two parent individuals to produce a child individual.
+     * The child is created by averaging the corresponding weights from both parents.
+     *
+     * @param parent1 the first parent individual
+     * @param parent2 the second parent individual
+     * @return the child individual resulting from the crossover
+     */
     static double[] crossover(double[] parent1, double[] parent2) {
         double[] child = new double[parent1.length];
         for (int i = 0; i < parent1.length; i++) {
@@ -217,6 +284,14 @@ class EvolutionaryAlgorithm {
         return child;
     }
 
+    /**
+     * Mutates an individual by randomly altering its weights.
+     * Each weight has a probability defined by MUTATION_RATE to be mutated.
+     * The mutation alters the weight by a random value between -5 and 5.
+     *
+     * @param individual the individual to mutate
+     * @return the mutated individual
+     */
     static double[] mutate(double[] individual) {
         double[] mutated = new double[individual.length];
         for (int i = 0; i < individual.length; i++) {
